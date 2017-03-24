@@ -30,6 +30,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-module.exports = {
-    KVTree: require('./kv_tree')
-};
+const chai = require('chai');
+const expect = chai.expect;
+
+const pmemkv = require('../lib/all');
+
+describe('KVTree', () => {
+
+    it('uses module', () => {
+        expect(pmemkv.KVTree).to.exist;
+        expect(pmemkv['KVTree']).to.exist;
+        expect(pmemkv['madeThisUP']).not.to.exist;
+    });
+
+});
