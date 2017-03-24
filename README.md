@@ -10,11 +10,11 @@ are logged as GitHub issues.*
 
 * Node.js 7 or higher
 * [pmemkv](https://github.com/pmem/pmemkv) - native key/value library
-* [ffi](https://github.com/node-ffi/node-ffi) - for native library integration
+* [node-ffi](https://github.com/node-ffi/node-ffi) - for native library integration
 * Used only for testing:
-  * [mocha](https://github.com/mochajs/mocha) - test framework
   * [chai](https://github.com/chaijs/chai) - test assertion library
   * [chai-string](https://github.com/onechiporenko/chai-string) - string assertion library
+  * [mocha](https://github.com/mochajs/mocha) - test framework
 
 ## Installation
 
