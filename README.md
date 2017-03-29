@@ -8,7 +8,7 @@ are logged as GitHub issues.*
 
 ## Dependencies
 
-* Node.js 7 or higher
+* Node.js 6.10 or higher
 * [pmemkv](https://github.com/pmem/pmemkv) - native key/value library
 * [node-ffi](https://github.com/node-ffi/node-ffi) - for native library integration
 * Used only for testing:
