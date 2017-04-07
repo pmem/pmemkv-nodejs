@@ -100,14 +100,23 @@ describe('KVTree', () => {
 
     it('gets key', () => {
         const kv = new pmemkv.KVTree(PATH, SIZE);
-        kv.put('key1', 'value1');
-        expect(kv.get('key1')).to.equal('value1');
+        const val = 'one\ttwo\nthree';
+        kv.put('key1', val);
+        expect(kv.get('key1')).to.equal(val);
         kv.close();
     });
 
     it('gets missing key', () => {
         const kv = new pmemkv.KVTree(PATH, SIZE);
         expect(kv.get('key1')).not.to.exist;
+        kv.close();
+    });
+
+    it('gets unicode value', () => {
+        const kv = new pmemkv.KVTree(PATH, SIZE);
+        const val = '记 means to remember, note, record';
+        kv.put('key1', val);
+        expect(kv.get('key1')).to.equal(val);
         kv.close();
     });
 
