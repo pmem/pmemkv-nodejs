@@ -65,7 +65,7 @@ describe('KVTree', () => {
         expect(kv.closed).to.be.true;
     });
 
-    it('creates instance from existing', () => {
+    it('creates instance from existing pool', () => {
         const size = 1024 * 1024 * 13;
         let kv = new pmemkv.KVTree(PATH, size);
         kv.close();
@@ -90,37 +90,39 @@ describe('KVTree', () => {
         kv.close();
     });
 
-    it('fails to create instance with huge size', () => {
-        // todo add test case
-    });
-
-    it('fails to create instance with tiny size', () => {
-        // todo add test case
-    });
-
-    it('gets key', () => {
-        const kv = new pmemkv.KVTree(PATH, SIZE);
-        const val = 'one\ttwo\nthree';
-        kv.put('key1', val);
-        expect(kv.get('key1')).to.equal(val);
-        kv.close();
-    });
-
     it('gets missing key', () => {
         const kv = new pmemkv.KVTree(PATH, SIZE);
         expect(kv.get('key1')).not.to.exist;
         kv.close();
     });
 
-    it('gets unicode value', () => {
+    it('puts basic value', () => {
         const kv = new pmemkv.KVTree(PATH, SIZE);
-        const val = '记 means to remember, note, record';
+        kv.put('key1', 'value1');
+        expect(kv.get('key1')).to.equal('value1');
+        kv.close();
+    });
+
+    it('puts complex value', () => {
+        const kv = new pmemkv.KVTree(PATH, SIZE);
+        const val = 'one\ttwo or <p>three</p>\n {four}   and ^five';
         kv.put('key1', val);
         expect(kv.get('key1')).to.equal(val);
         kv.close();
     });
 
-    it('replaces key', () => {
+    it('puts multiple values', () => {
+        const kv = new pmemkv.KVTree(PATH, SIZE);
+        kv.put('key1', 'value1');
+        kv.put('key2', 'value2');
+        kv.put('key3', 'value3');
+        expect(kv.get('key1')).to.equal('value1');
+        expect(kv.get('key2')).to.equal('value2');
+        expect(kv.get('key3')).to.equal('value3');
+        kv.close();
+    });
+
+    it('puts overwriting existing value', () => {
         const kv = new pmemkv.KVTree(PATH, SIZE);
         kv.put('key1', 'value1');
         expect(kv.get('key1')).to.equal('value1');
@@ -131,13 +133,45 @@ describe('KVTree', () => {
         kv.close();
     });
 
-    it('removes key', () => {
+    it('puts unicode key', () => {
+        const kv = new pmemkv.KVTree(PATH, SIZE);
+        const val = 'to remember, note, record';
+        kv.put('记', val);
+        expect(kv.get('记')).to.equal(val);
+        kv.close();
+    });
+
+    it('puts unicode value', () => {
+        const kv = new pmemkv.KVTree(PATH, SIZE);
+        const val = '记 means to remember, note, record';
+        kv.put('key1', val);
+        expect(kv.get('key1')).to.equal(val);
+        kv.close();
+    });
+
+    it('removes key and value', () => {
         const kv = new pmemkv.KVTree(PATH, SIZE);
         kv.put('key1', 'value1');
         expect(kv.get('key1')).to.exist;
         kv.remove('key1');
         expect(kv.get('key1')).not.to.exist;
         kv.close();
+    });
+
+    it('throws exception on create when path is invalid', () => {
+        // todo add test case
+    });
+
+    it('throws exception on create with huge size', () => {
+        // todo add test case
+    });
+
+    it('throws exception on create with tiny size', () => {
+        // todo add test case
+    });
+
+    it('throws exception on put when out of space', () => {
+        // todo add test case
     });
 
     it('uses immutable private attributes', () => {
@@ -157,4 +191,4 @@ describe('KVTree', () => {
         expect(pmemkv['madeThisUP']).not.to.exist;
     });
 
-});
+});  // todo missing test cases for very large keys & values, empty keys & values
