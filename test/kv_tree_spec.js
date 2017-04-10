@@ -31,7 +31,7 @@
  */
 
 const PATH = '/dev/shm/pmemkv-nodejs';
-const SIZE = 1024 * 1024 * 16;
+const SIZE = 1024 * 1024 * 8;
 
 const chai = require('chai');
 const expect = chai.expect;
@@ -111,6 +111,20 @@ describe('KVTree', () => {
         kv.close();
     });
 
+    it('puts empty key', () => {
+        const kv = new pmemkv.KVTree(PATH, SIZE);
+        kv.put('', 'value1');
+        expect(kv.get('')).to.equal('value1');
+        kv.close();
+    });
+
+    it('puts empty value', () => {
+        const kv = new pmemkv.KVTree(PATH, SIZE);
+        kv.put('key1', '');
+        expect(kv.get('key1')).to.equal('');
+        kv.close();
+    });
+
     it('puts multiple values', () => {
         const kv = new pmemkv.KVTree(PATH, SIZE);
         kv.put('key1', 'value1');
@@ -149,6 +163,14 @@ describe('KVTree', () => {
         kv.close();
     });
 
+    it('puts very large key', () => {
+        // todo finish
+    });
+
+    it('puts very large value', () => {
+        // todo finish
+    });
+
     it('removes key and value', () => {
         const kv = new pmemkv.KVTree(PATH, SIZE);
         kv.put('key1', 'value1');
@@ -159,19 +181,40 @@ describe('KVTree', () => {
     });
 
     it('throws exception on create when path is invalid', () => {
-        // todo add test case
+        let kv = undefined;
+        try {
+            kv = new pmemkv.KVTree('/tmp/123/234/345/456/567/678/nope.nope', SIZE);
+            expect(true).to.be.false;
+        } catch (e) {
+            expect(e.message).to.equal('unable to open persistent pool');
+        }
+        expect(kv).not.to.exist;
     });
 
     it('throws exception on create with huge size', () => {
-        // todo add test case
+        let kv = undefined;
+        try {
+            kv = new pmemkv.KVTree(PATH, 9223372036854775807);  // 9.22 exabytes
+            expect(true).to.be.false;
+        } catch (e) {
+            expect(e.message).to.equal('unable to open persistent pool');
+        }
+        expect(kv).not.to.exist;
     });
 
     it('throws exception on create with tiny size', () => {
-        // todo add test case
+        let kv = undefined;
+        try {
+            kv = new pmemkv.KVTree(PATH, SIZE - 1);  // too small
+            expect(true).to.be.false;
+        } catch (e) {
+            expect(e.message).to.equal('unable to open persistent pool');
+        }
+        expect(kv).not.to.exist;
     });
 
     it('throws exception on put when out of space', () => {
-        // todo add test case
+        // todo finish
     });
 
     it('uses immutable private attributes', () => {
@@ -191,4 +234,4 @@ describe('KVTree', () => {
         expect(pmemkv['madeThisUP']).not.to.exist;
     });
 
-});  // todo missing test cases for very large keys & values, empty keys & values
+});
