@@ -39,11 +39,8 @@ const fs = require('fs');
 const pmemkv = require('../lib/all');
 
 function clean() {
-    try {
-        fs.unlinkSync(PATH);
-    } catch (err) {
-        // ignore any errors
-    }
+    if (fs.existsSync(PATH)) fs.unlinkSync(PATH);
+    expect(fs.existsSync(PATH)).to.be.false;
 }
 
 describe('KVTree', () => {
@@ -79,15 +76,14 @@ describe('KVTree', () => {
     it('closes instance multiple times', () => {
         const size = 1024 * 1024 * 15;
         const kv = new pmemkv.KVTree(PATH, size);
-        expect(kv.size).to.equal(size);
         expect(kv.closed).to.be.false;
+        expect(kv.size).to.equal(size);
         kv.close();
         expect(kv.closed).to.be.true;
         kv.close();
         expect(kv.closed).to.be.true;
         kv.close();
         expect(kv.closed).to.be.true;
-        kv.close();
     });
 
     it('gets missing key', () => {
@@ -147,7 +143,7 @@ describe('KVTree', () => {
         kv.close();
     });
 
-    it('puts unicode key', () => {
+    it('puts utf-8 key', () => {
         const kv = new pmemkv.KVTree(PATH, SIZE);
         const val = 'to remember, note, record';
         kv.put('记', val);
@@ -155,16 +151,12 @@ describe('KVTree', () => {
         kv.close();
     });
 
-    it('puts unicode value', () => {
+    it('puts utf-8 value', () => {
         const kv = new pmemkv.KVTree(PATH, SIZE);
         const val = '记 means to remember, note, record';
         kv.put('key1', val);
         expect(kv.get('key1')).to.equal(val);
         kv.close();
-    });
-
-    it('puts very large key', () => {
-        // todo finish
     });
 
     it('puts very large value', () => {
@@ -174,7 +166,7 @@ describe('KVTree', () => {
     it('removes key and value', () => {
         const kv = new pmemkv.KVTree(PATH, SIZE);
         kv.put('key1', 'value1');
-        expect(kv.get('key1')).to.exist;
+        expect(kv.get('key1')).to.eql('value1');
         kv.remove('key1');
         expect(kv.get('key1')).not.to.exist;
         kv.close();
@@ -194,7 +186,7 @@ describe('KVTree', () => {
     it('throws exception on create with huge size', () => {
         let kv = undefined;
         try {
-            kv = new pmemkv.KVTree(PATH, 9223372036854775807);  // 9.22 exabytes
+            kv = new pmemkv.KVTree(PATH, 9223372036854775807); // 9.22 exabytes
             expect(true).to.be.false;
         } catch (e) {
             expect(e.message).to.equal('unable to open persistent pool');
@@ -205,7 +197,7 @@ describe('KVTree', () => {
     it('throws exception on create with tiny size', () => {
         let kv = undefined;
         try {
-            kv = new pmemkv.KVTree(PATH, SIZE - 1);  // too small
+            kv = new pmemkv.KVTree(PATH, SIZE - 1); // too small
             expect(true).to.be.false;
         } catch (e) {
             expect(e.message).to.equal('unable to open persistent pool');
@@ -214,7 +206,18 @@ describe('KVTree', () => {
     });
 
     it('throws exception on put when out of space', () => {
-        // todo finish
+        const kv = new pmemkv.KVTree(PATH, SIZE);
+        for (let i = 0; i < 20692; i++) {
+            const istr = i.toString();
+            kv.put(istr, istr);
+        }
+        try {
+            kv.put('20693', '20693');
+            expect(true).to.be.false;
+        } catch (e) {
+            expect(e.message).to.equal('unable to put value');
+        }
+        kv.close();
     });
 
     it('uses immutable private attributes', () => {
@@ -228,7 +231,7 @@ describe('KVTree', () => {
         expect(kv.closed).to.be.true;
     });
 
-    it('uses module to publish objects', () => {
+    it('uses module to publish types', () => {
         expect(pmemkv.KVTree).to.exist;
         expect(pmemkv['KVTree']).to.exist;
         expect(pmemkv['madeThisUP']).not.to.exist;
