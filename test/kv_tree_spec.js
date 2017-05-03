@@ -99,6 +99,17 @@ describe('KVTree', () => {
         kv.close();
     });
 
+    it('puts binary key', () => {
+        // todo should fail?
+    });
+
+    it('puts binary value', () => {
+        const kv = new pmemkv.KVTree(PATH, SIZE);
+        kv.put('key1', "A\0B\0\0C");
+        expect(kv.get('key1')).to.equal("A\0B\0\0C");
+        kv.close();
+    });
+
     it('puts complex value', () => {
         const kv = new pmemkv.KVTree(PATH, SIZE);
         const val = 'one\ttwo or <p>three</p>\n {four}   and ^five';
