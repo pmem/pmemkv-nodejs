@@ -74,10 +74,9 @@ describe('KVTree', () => {
     });
 
     it('closes instance multiple times', () => {
-        const size = 1024 * 1024 * 15;
-        const kv = new pmemkv.KVTree(PATH, size);
+        const kv = new pmemkv.KVTree(PATH, SIZE);
         expect(kv.closed).to.be.false;
-        expect(kv.size).to.equal(size);
+        expect(kv.size).to.equal(SIZE);
         kv.close();
         expect(kv.closed).to.be.true;
         kv.close();
