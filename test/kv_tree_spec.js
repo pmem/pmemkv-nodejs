@@ -217,12 +217,11 @@ describe('KVTree', () => {
 
     it('throws exception on put when out of space', () => {
         const kv = new pmemkv.KVTree(PATH, SIZE);
-        for (let i = 0; i < 20692; i++) {
-            const istr = i.toString();
-            kv.put(istr, istr);
-        }
         try {
-            kv.put('20693', '20693');
+            for (let i = 0; i < 100000; i++) {
+                const istr = i.toString();
+                kv.put(istr, istr);
+            }
             expect(true).to.be.false;
         } catch (e) {
             expect(e.message).to.equal('unable to put value');
