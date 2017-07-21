@@ -119,15 +119,23 @@ describe('KVTree', () => {
 
     it('puts empty key', () => {
         const kv = new pmemkv.KVTree(PATH, SIZE);
-        kv.put('', 'value1');
-        expect(kv.get('')).to.equal('value1');
+        kv.put('', 'empty');
+        kv.put(' ', 'single-space');
+        kv.put('\t\t', 'two-tab');
+        expect(kv.get('')).to.equal('empty');
+        expect(kv.get(' ')).to.equal('single-space');
+        expect(kv.get('\t\t')).to.equal('two-tab');
         kv.close();
     });
 
     it('puts empty value', () => {
         const kv = new pmemkv.KVTree(PATH, SIZE);
-        kv.put('key1', '');
-        expect(kv.get('key1')).to.equal('');
+        kv.put('empty', '');
+        kv.put('single-space', ' ');
+        kv.put('two-tab', '\t\t');
+        expect(kv.get('empty')).to.equal('');
+        expect(kv.get('single-space')).to.equal(' ');
+        expect(kv.get('two-tab')).to.equal('\t\t');
         kv.close();
     });
 
