@@ -43,7 +43,7 @@ function clean() {
     expect(fs.existsSync(PATH)).to.be.false;
 }
 
-describe('KVTree', () => {
+describe('KVEngine', () => {
 
     beforeEach(() => {
         clean();
@@ -55,7 +55,7 @@ describe('KVTree', () => {
 
     it('creates instance', () => {
         const size = 1024 * 1024 * 11;
-        const kv = new pmemkv.KVTree(PATH, size);
+        const kv = new pmemkv.KVEngine(PATH, size);
         expect(kv.closed).to.be.false;
         expect(kv.size).to.equal(size);
         kv.close();
@@ -64,9 +64,10 @@ describe('KVTree', () => {
 
     it('creates instance from existing pool', () => {
         const size = 1024 * 1024 * 13;
-        let kv = new pmemkv.KVTree(PATH, size);
+        let kv = new pmemkv.KVEngine(PATH, size);
         kv.close();
-        kv = new pmemkv.KVTree(PATH, 0);
+        expect(kv.closed).to.be.true;
+        kv = new pmemkv.KVEngine(PATH, 0);
         expect(kv.closed).to.be.false;
         expect(kv.size).to.equal(size);
         kv.close();
@@ -74,7 +75,7 @@ describe('KVTree', () => {
     });
 
     it('closes instance multiple times', () => {
-        const kv = new pmemkv.KVTree(PATH, SIZE);
+        const kv = new pmemkv.KVEngine(PATH, SIZE);
         expect(kv.closed).to.be.false;
         expect(kv.size).to.equal(SIZE);
         kv.close();
@@ -86,13 +87,13 @@ describe('KVTree', () => {
     });
 
     it('gets missing key', () => {
-        const kv = new pmemkv.KVTree(PATH, SIZE);
+        const kv = new pmemkv.KVEngine(PATH, SIZE);
         expect(kv.get('key1')).not.to.exist;
         kv.close();
     });
 
     it('puts basic value', () => {
-        const kv = new pmemkv.KVTree(PATH, SIZE);
+        const kv = new pmemkv.KVEngine(PATH, SIZE);
         kv.put('key1', 'value1');
         expect(kv.get('key1')).to.equal('value1');
         kv.close();
@@ -103,14 +104,14 @@ describe('KVTree', () => {
     });
 
     it('puts binary value', () => {
-        const kv = new pmemkv.KVTree(PATH, SIZE);
+        const kv = new pmemkv.KVEngine(PATH, SIZE);
         kv.put('key1', "A\0B\0\0C");
         expect(kv.get('key1')).to.equal("A\0B\0\0C");
         kv.close();
     });
 
     it('puts complex value', () => {
-        const kv = new pmemkv.KVTree(PATH, SIZE);
+        const kv = new pmemkv.KVEngine(PATH, SIZE);
         const val = 'one\ttwo or <p>three</p>\n {four}   and ^five';
         kv.put('key1', val);
         expect(kv.get('key1')).to.equal(val);
@@ -118,7 +119,7 @@ describe('KVTree', () => {
     });
 
     it('puts empty key', () => {
-        const kv = new pmemkv.KVTree(PATH, SIZE);
+        const kv = new pmemkv.KVEngine(PATH, SIZE);
         kv.put('', 'empty');
         kv.put(' ', 'single-space');
         kv.put('\t\t', 'two-tab');
@@ -129,7 +130,7 @@ describe('KVTree', () => {
     });
 
     it('puts empty value', () => {
-        const kv = new pmemkv.KVTree(PATH, SIZE);
+        const kv = new pmemkv.KVEngine(PATH, SIZE);
         kv.put('empty', '');
         kv.put('single-space', ' ');
         kv.put('two-tab', '\t\t');
@@ -140,7 +141,7 @@ describe('KVTree', () => {
     });
 
     it('puts multiple values', () => {
-        const kv = new pmemkv.KVTree(PATH, SIZE);
+        const kv = new pmemkv.KVEngine(PATH, SIZE);
         kv.put('key1', 'value1');
         kv.put('key2', 'value2');
         kv.put('key3', 'value3');
@@ -151,7 +152,7 @@ describe('KVTree', () => {
     });
 
     it('puts overwriting existing value', () => {
-        const kv = new pmemkv.KVTree(PATH, SIZE);
+        const kv = new pmemkv.KVEngine(PATH, SIZE);
         kv.put('key1', 'value1');
         expect(kv.get('key1')).to.equal('value1');
         kv.put('key1', 'value123');
@@ -162,7 +163,7 @@ describe('KVTree', () => {
     });
 
     it('puts utf-8 key', () => {
-        const kv = new pmemkv.KVTree(PATH, SIZE);
+        const kv = new pmemkv.KVEngine(PATH, SIZE);
         const val = 'to remember, note, record';
         kv.put('记', val);
         expect(kv.get('记')).to.equal(val);
@@ -170,7 +171,7 @@ describe('KVTree', () => {
     });
 
     it('puts utf-8 value', () => {
-        const kv = new pmemkv.KVTree(PATH, SIZE);
+        const kv = new pmemkv.KVEngine(PATH, SIZE);
         const val = '记 means to remember, note, record';
         kv.put('key1', val);
         expect(kv.get('key1')).to.equal(val);
@@ -182,7 +183,7 @@ describe('KVTree', () => {
     });
 
     it('removes key and value', () => {
-        const kv = new pmemkv.KVTree(PATH, SIZE);
+        const kv = new pmemkv.KVEngine(PATH, SIZE);
         kv.put('key1', 'value1');
         expect(kv.get('key1')).to.eql('value1');
         kv.remove('key1');
@@ -193,7 +194,7 @@ describe('KVTree', () => {
     it('throws exception on create when path is invalid', () => {
         let kv = undefined;
         try {
-            kv = new pmemkv.KVTree('/tmp/123/234/345/456/567/678/nope.nope', SIZE);
+            kv = new pmemkv.KVEngine('/tmp/123/234/345/456/567/678/nope.nope', SIZE);
             expect(true).to.be.false;
         } catch (e) {
             expect(e.message).to.equal('unable to open persistent pool');
@@ -204,7 +205,7 @@ describe('KVTree', () => {
     it('throws exception on create with huge size', () => {
         let kv = undefined;
         try {
-            kv = new pmemkv.KVTree(PATH, 9223372036854775807); // 9.22 exabytes
+            kv = new pmemkv.KVEngine(PATH, 9223372036854775807); // 9.22 exabytes
             expect(true).to.be.false;
         } catch (e) {
             expect(e.message).to.equal('unable to open persistent pool');
@@ -215,7 +216,7 @@ describe('KVTree', () => {
     it('throws exception on create with tiny size', () => {
         let kv = undefined;
         try {
-            kv = new pmemkv.KVTree(PATH, SIZE - 1); // too small
+            kv = new pmemkv.KVEngine(PATH, SIZE - 1); // too small
             expect(true).to.be.false;
         } catch (e) {
             expect(e.message).to.equal('unable to open persistent pool');
@@ -224,7 +225,7 @@ describe('KVTree', () => {
     });
 
     it('throws exception on put when out of space', () => {
-        const kv = new pmemkv.KVTree(PATH, SIZE);
+        const kv = new pmemkv.KVEngine(PATH, SIZE);
         try {
             for (let i = 0; i < 100000; i++) {
                 const istr = i.toString();
@@ -238,7 +239,7 @@ describe('KVTree', () => {
     });
 
     it('uses immutable private attributes', () => {
-        const kv = new pmemkv.KVTree(PATH, SIZE);
+        const kv = new pmemkv.KVEngine(PATH, SIZE);
         kv['_kv'] = undefined;
         expect(kv['_kv']).to.exist;
         expect(kv.size).to.equal(SIZE);
@@ -249,8 +250,8 @@ describe('KVTree', () => {
     });
 
     it('uses module to publish types', () => {
-        expect(pmemkv.KVTree).to.exist;
-        expect(pmemkv['KVTree']).to.exist;
+        expect(pmemkv.KVEngine).to.exist;
+        expect(pmemkv['KVEngine']).to.exist;
         expect(pmemkv['madeThisUP']).not.to.exist;
     });
 
