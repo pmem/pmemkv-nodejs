@@ -58,7 +58,6 @@ describe('KVEngine', () => {
         const size = 1024 * 1024 * 11;
         const kv = new pmemkv.KVEngine(ENGINE, PATH, size);
         expect(kv.closed).to.be.false;
-        expect(kv.size).to.equal(size);
         kv.close();
         expect(kv.closed).to.be.true;
     });
@@ -70,7 +69,6 @@ describe('KVEngine', () => {
         expect(kv.closed).to.be.true;
         kv = new pmemkv.KVEngine(ENGINE, PATH, 0);
         expect(kv.closed).to.be.false;
-        expect(kv.size).to.equal(size);
         kv.close();
         expect(kv.closed).to.be.true;
     });
@@ -78,7 +76,6 @@ describe('KVEngine', () => {
     it('closes instance multiple times', () => {
         const kv = new pmemkv.KVEngine(ENGINE, PATH, SIZE);
         expect(kv.closed).to.be.false;
-        expect(kv.size).to.equal(SIZE);
         kv.close();
         expect(kv.closed).to.be.true;
         kv.close();
@@ -254,7 +251,6 @@ describe('KVEngine', () => {
         const kv = new pmemkv.KVEngine(ENGINE, PATH, SIZE);
         kv['_kv'] = undefined;
         expect(kv['_kv']).to.exist;
-        expect(kv.size).to.equal(SIZE);
         kv.close();
         kv['_closed'] = false;
         expect(kv['_closed']).to.be.true;
