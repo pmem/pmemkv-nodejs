@@ -261,6 +261,16 @@ describe('KVEngine', () => {
         expect(kv.closed).to.be.true;
     });
 
+    it('uses blackhole engine', () => {
+        const kv = new pmemkv.KVEngine('blackhole', PATH, SIZE);
+        expect(kv.get('key1')).not.to.exist;
+        kv.put('key1', 'value1');
+        expect(kv.get('key1')).not.to.exist;
+        kv.remove('key1');
+        expect(kv.get('key1')).not.to.exist;
+        kv.close();
+    });
+
     it('uses module to publish types', () => {
         expect(pmemkv.KVEngine).to.exist;
         expect(pmemkv['KVEngine']).to.exist;
