@@ -74,7 +74,7 @@ describe('KVEngine', () => {
     });
 
     it('closes instance multiple times', () => {
-        const kv = new pmemkv.KVEngine(ENGINE, PATH, SIZE);
+        const kv = new pmemkv.KVEngine(ENGINE, PATH);
         expect(kv.closed).to.be.false;
         kv.close();
         expect(kv.closed).to.be.true;
@@ -85,31 +85,34 @@ describe('KVEngine', () => {
     });
 
     it('gets missing key', () => {
-        const kv = new pmemkv.KVEngine(ENGINE, PATH, SIZE);
+        const kv = new pmemkv.KVEngine(ENGINE, PATH);
         expect(kv.get('key1')).not.to.exist;
         kv.close();
     });
 
     it('puts basic value', () => {
-        const kv = new pmemkv.KVEngine(ENGINE, PATH, SIZE);
+        const kv = new pmemkv.KVEngine(ENGINE, PATH);
         kv.put('key1', 'value1');
         expect(kv.get('key1')).to.equal('value1');
         kv.close();
     });
 
     it('puts binary key', () => {
-        // todo should fail?
+        const kv = new pmemkv.KVEngine(ENGINE, PATH);
+        kv.put("A\0B\0\0C", 'value1');
+        expect(kv.get("A\0B\0\0C")).to.equal('value1');
+        kv.close();
     });
 
     it('puts binary value', () => {
-        const kv = new pmemkv.KVEngine(ENGINE, PATH, SIZE);
+        const kv = new pmemkv.KVEngine(ENGINE, PATH);
         kv.put('key1', "A\0B\0\0C");
         expect(kv.get('key1')).to.equal("A\0B\0\0C");
         kv.close();
     });
 
     it('puts complex value', () => {
-        const kv = new pmemkv.KVEngine(ENGINE, PATH, SIZE);
+        const kv = new pmemkv.KVEngine(ENGINE, PATH);
         const val = 'one\ttwo or <p>three</p>\n {four}   and ^five';
         kv.put('key1', val);
         expect(kv.get('key1')).to.equal(val);
@@ -117,7 +120,7 @@ describe('KVEngine', () => {
     });
 
     it('puts empty key', () => {
-        const kv = new pmemkv.KVEngine(ENGINE, PATH, SIZE);
+        const kv = new pmemkv.KVEngine(ENGINE, PATH);
         kv.put('', 'empty');
         kv.put(' ', 'single-space');
         kv.put('\t\t', 'two-tab');
@@ -128,7 +131,7 @@ describe('KVEngine', () => {
     });
 
     it('puts empty value', () => {
-        const kv = new pmemkv.KVEngine(ENGINE, PATH, SIZE);
+        const kv = new pmemkv.KVEngine(ENGINE, PATH);
         kv.put('empty', '');
         kv.put('single-space', ' ');
         kv.put('two-tab', '\t\t');
@@ -139,7 +142,7 @@ describe('KVEngine', () => {
     });
 
     it('puts multiple values', () => {
-        const kv = new pmemkv.KVEngine(ENGINE, PATH, SIZE);
+        const kv = new pmemkv.KVEngine(ENGINE, PATH);
         kv.put('key1', 'value1');
         kv.put('key2', 'value2');
         kv.put('key3', 'value3');
@@ -150,7 +153,7 @@ describe('KVEngine', () => {
     });
 
     it('puts overwriting existing value', () => {
-        const kv = new pmemkv.KVEngine(ENGINE, PATH, SIZE);
+        const kv = new pmemkv.KVEngine(ENGINE, PATH);
         kv.put('key1', 'value1');
         expect(kv.get('key1')).to.equal('value1');
         kv.put('key1', 'value123');
@@ -161,7 +164,7 @@ describe('KVEngine', () => {
     });
 
     it('puts utf-8 key', () => {
-        const kv = new pmemkv.KVEngine(ENGINE, PATH, SIZE);
+        const kv = new pmemkv.KVEngine(ENGINE, PATH);
         const val = 'to remember, note, record';
         kv.put('记', val);
         expect(kv.get('记')).to.equal(val);
@@ -169,7 +172,7 @@ describe('KVEngine', () => {
     });
 
     it('puts utf-8 value', () => {
-        const kv = new pmemkv.KVEngine(ENGINE, PATH, SIZE);
+        const kv = new pmemkv.KVEngine(ENGINE, PATH);
         const val = '记 means to remember, note, record';
         kv.put('key1', val);
         expect(kv.get('key1')).to.equal(val);
@@ -181,7 +184,7 @@ describe('KVEngine', () => {
     });
 
     it('removes key and value', () => {
-        const kv = new pmemkv.KVEngine(ENGINE, PATH, SIZE);
+        const kv = new pmemkv.KVEngine(ENGINE, PATH);
         kv.put('key1', 'value1');
         expect(kv.get('key1')).to.eql('value1');
         kv.remove('key1');
@@ -192,7 +195,7 @@ describe('KVEngine', () => {
     it('throws exception on create when engine is invalid', () => {
         let kv = undefined;
         try {
-            kv = new pmemkv.KVEngine('nope.nope', PATH, SIZE);
+            kv = new pmemkv.KVEngine('nope.nope', PATH);
             expect(true).to.be.false;
         } catch (e) {
             expect(e.message).to.equal('unable to open persistent pool');
@@ -203,7 +206,7 @@ describe('KVEngine', () => {
     it('throws exception on create when path is invalid', () => {
         let kv = undefined;
         try {
-            kv = new pmemkv.KVEngine(ENGINE, '/tmp/123/234/345/456/567/678/nope.nope', SIZE);
+            kv = new pmemkv.KVEngine(ENGINE, '/tmp/123/234/345/456/567/678/nope.nope');
             expect(true).to.be.false;
         } catch (e) {
             expect(e.message).to.equal('unable to open persistent pool');
@@ -234,7 +237,7 @@ describe('KVEngine', () => {
     });
 
     it('throws exception on put when out of space', () => {
-        const kv = new pmemkv.KVEngine(ENGINE, PATH, SIZE);
+        const kv = new pmemkv.KVEngine(ENGINE, PATH);
         try {
             for (let i = 0; i < 100000; i++) {
                 const istr = i.toString();
@@ -248,7 +251,7 @@ describe('KVEngine', () => {
     });
 
     it('uses immutable private attributes', () => {
-        const kv = new pmemkv.KVEngine(ENGINE, PATH, SIZE);
+        const kv = new pmemkv.KVEngine(ENGINE, PATH);
         kv['_kv'] = undefined;
         expect(kv['_kv']).to.exist;
         kv.close();
@@ -258,7 +261,7 @@ describe('KVEngine', () => {
     });
 
     it('uses blackhole engine', () => {
-        const kv = new pmemkv.KVEngine('blackhole', PATH, SIZE);
+        const kv = new pmemkv.KVEngine('blackhole', PATH);
         expect(kv.get('key1')).not.to.exist;
         kv.put('key1', 'value1');
         expect(kv.get('key1')).not.to.exist;
