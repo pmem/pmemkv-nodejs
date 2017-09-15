@@ -19,7 +19,7 @@ are logged as GitHub issues.*
 
 ## Installation
 
-Start by installing [pmemkv](https://github.com/pmem/pmemkv#installation) on your system.
+Start by installing [pmemkv](https://github.com/pmem/pmemkv/blob/master/INSTALLING.md) on your system.
 
 Add npm module to your project:
 
