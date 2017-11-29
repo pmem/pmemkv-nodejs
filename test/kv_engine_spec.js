@@ -35,6 +35,7 @@ const PATH = '/dev/shm/pmemkv-nodejs';
 const SIZE = 1024 * 1024 * 8;
 
 const chai = require('chai');
+chai.use(require('chai-string'));
 const expect = chai.expect;
 const fs = require('fs');
 const pmemkv = require('../lib/all');
@@ -245,7 +246,7 @@ describe('KVEngine', () => {
             }
             expect(true).to.be.false;
         } catch (e) {
-            expect(e.message).to.equal('unable to put value');
+            expect(e.message).to.startWith('unable to put key:');
         }
         kv.close();
     });
