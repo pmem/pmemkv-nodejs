@@ -9,7 +9,7 @@ are logged as GitHub issues.*
 ## Dependencies
 
 * Node.js 6.10 or higher
-* [NVML](https://github.com/pmem/nvml) - native persistent memory libraries
+* [PMDK](https://github.com/pmem/pmdk) - native persistent memory libraries
 * [pmemkv](https://github.com/pmem/pmemkv) - native key/value library
 * [node-ffi](https://github.com/node-ffi/node-ffi) - for native library integration
 * Used only for testing:
