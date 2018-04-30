@@ -30,7 +30,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-const ENGINE = 'kvtree';
+const ENGINE = 'kvtree2';
 const PATH = '/dev/shm/pmemkv-nodejs';
 const SIZE = 1024 * 1024 * 8;
 

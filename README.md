@@ -36,7 +36,7 @@ in this simple example.
 ```
 const pmemkv = require('pmemkv');
 
-const kv = new pmemkv.KVEngine('kvtree', '/dev/shm/mykv');
+const kv = new pmemkv.KVEngine('kvtree2', '/dev/shm/mykv');
 kv.put('key1', 'value1');
 expect(kv.get('key1')).to.equal('value1');
 kv.remove('key1');
