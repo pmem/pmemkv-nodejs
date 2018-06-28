@@ -55,11 +55,31 @@ describe('KVEngine', () => {
         clean();
     });
 
+    it('uses module to publish types', () => {
+        expect(pmemkv.KVEngine).to.exist;
+        expect(pmemkv['KVEngine']).to.exist;
+        expect(pmemkv['madeThisUP']).not.to.exist;
+    });
+
+    it('uses blackhole engine', () => {
+        const kv = new pmemkv.KVEngine('blackhole', PATH);
+        expect(kv.get('key1')).not.to.exist;
+        kv.put('key1', 'value1');
+        expect(kv.get('key1')).not.to.exist;
+        kv.remove('key1');
+        expect(kv.get('key1')).not.to.exist;
+        kv.close();
+    });
+
     it('creates instance', () => {
         const size = 1024 * 1024 * 11;
         const kv = new pmemkv.KVEngine(ENGINE, PATH, size);
+        kv['_kv'] = undefined;
+        expect(kv['_kv']).to.exist;
         expect(kv.closed).to.be.false;
         kv.close();
+        kv['_closed'] = false;
+        expect(kv['_closed']).to.be.true;
         expect(kv.closed).to.be.true;
     });
 
@@ -87,13 +107,16 @@ describe('KVEngine', () => {
 
     it('gets missing key', () => {
         const kv = new pmemkv.KVEngine(ENGINE, PATH);
+        expect(kv.exists('key1')).to.be.false;
         expect(kv.get('key1')).not.to.exist;
         kv.close();
     });
 
     it('puts basic value', () => {
         const kv = new pmemkv.KVEngine(ENGINE, PATH);
+        expect(kv.exists('key1')).to.be.false;
         kv.put('key1', 'value1');
+        expect(kv.exists('key1')).to.be.true;
         expect(kv.get('key1')).to.equal('value1');
         kv.close();
     });
@@ -101,6 +124,7 @@ describe('KVEngine', () => {
     it('puts binary key', () => {
         const kv = new pmemkv.KVEngine(ENGINE, PATH);
         kv.put("A\0B\0\0C", 'value1');
+        expect(kv.exists("A\0B\0\0C")).to.be.true;
         expect(kv.get("A\0B\0\0C")).to.equal('value1');
         kv.close();
     });
@@ -125,8 +149,11 @@ describe('KVEngine', () => {
         kv.put('', 'empty');
         kv.put(' ', 'single-space');
         kv.put('\t\t', 'two-tab');
+        expect(kv.exists('')).to.be.true;
         expect(kv.get('')).to.equal('empty');
+        expect(kv.exists(' ')).to.be.true;
         expect(kv.get(' ')).to.equal('single-space');
+        expect(kv.exists('\t\t')).to.be.true;
         expect(kv.get('\t\t')).to.equal('two-tab');
         kv.close();
     });
@@ -147,8 +174,11 @@ describe('KVEngine', () => {
         kv.put('key1', 'value1');
         kv.put('key2', 'value2');
         kv.put('key3', 'value3');
+        expect(kv.exists('key1')).to.be.true;
         expect(kv.get('key1')).to.equal('value1');
+        expect(kv.exists('key2')).to.be.true;
         expect(kv.get('key2')).to.equal('value2');
+        expect(kv.exists('key3')).to.be.true;
         expect(kv.get('key3')).to.equal('value3');
         kv.close();
     });
@@ -168,6 +198,7 @@ describe('KVEngine', () => {
         const kv = new pmemkv.KVEngine(ENGINE, PATH);
         const val = 'to remember, note, record';
         kv.put('记', val);
+        expect(kv.exists('记')).to.be.true;
         expect(kv.get('记')).to.equal(val);
         kv.close();
     });
@@ -187,8 +218,10 @@ describe('KVEngine', () => {
     it('removes key and value', () => {
         const kv = new pmemkv.KVEngine(ENGINE, PATH);
         kv.put('key1', 'value1');
+        expect(kv.exists('key1')).to.be.true;
         expect(kv.get('key1')).to.eql('value1');
         kv.remove('key1');
+        expect(kv.exists('key1')).to.be.false;
         expect(kv.get('key1')).not.to.exist;
         kv.close();
     });
@@ -249,32 +282,6 @@ describe('KVEngine', () => {
             expect(e.message).to.startWith('unable to put key:');
         }
         kv.close();
-    });
-
-    it('uses immutable private attributes', () => {
-        const kv = new pmemkv.KVEngine(ENGINE, PATH);
-        kv['_kv'] = undefined;
-        expect(kv['_kv']).to.exist;
-        kv.close();
-        kv['_closed'] = false;
-        expect(kv['_closed']).to.be.true;
-        expect(kv.closed).to.be.true;
-    });
-
-    it('uses blackhole engine', () => {
-        const kv = new pmemkv.KVEngine('blackhole', PATH);
-        expect(kv.get('key1')).not.to.exist;
-        kv.put('key1', 'value1');
-        expect(kv.get('key1')).not.to.exist;
-        kv.remove('key1');
-        expect(kv.get('key1')).not.to.exist;
-        kv.close();
-    });
-
-    it('uses module to publish types', () => {
-        expect(pmemkv.KVEngine).to.exist;
-        expect(pmemkv['KVEngine']).to.exist;
-        expect(pmemkv['madeThisUP']).not.to.exist;
     });
 
 });
