@@ -63,9 +63,11 @@ describe('KVEngine', () => {
 
     it('uses blackhole engine', () => {
         const kv = new pmemkv.KVEngine('blackhole', PATH);
+        expect(kv.count).to.equal(0);
         expect(kv.exists('key1')).to.be.false;
         expect(kv.get('key1')).not.to.exist;
         kv.put('key1', 'value1');
+        expect(kv.count).to.equal(0);
         expect(kv.exists('key1')).to.be.false;
         expect(kv.get('key1')).not.to.exist;
         kv.remove('key1');
@@ -287,19 +289,21 @@ describe('KVEngine', () => {
         kv.close();
     });
 
-    // ENABLE WHEN BTREE ENGINE IS DEFAULT
-    // it('uses each test', () => {
-    //     const kv = new pmemkv.KVEngine(ENGINE, PATH);
-    //     kv.put('1', '2');
-    //     kv.put('RR', '记!');
-    //     let result = '';
-    //     kv.each(
-    //         function (k, v) {
-    //             result += `<${k}>,<${v}>|`;
-    //         }
-    //     );
-    //     expect(result).to.eql('<1>,<2>|<RR>,<记!>|');
-    //     kv.close();
-    // });
+    it('uses each test', () => {
+        const kv = new pmemkv.KVEngine("btree", PATH); // todo switch back to ENGINE
+        expect(kv.count).to.equal(0);
+        kv.put('1', '2');
+        expect(kv.count).to.equal(1);
+        kv.put('RR', '记!');
+        expect(kv.count).to.equal(2);
+        let result = '';
+        kv.each(
+            function (k, v) {
+                result += `<${k}>,<${v}>|`;
+            }
+        );
+        expect(result).to.eql('<1>,<2>|<RR>,<记!>|');
+        kv.close();
+    });
 
 });
