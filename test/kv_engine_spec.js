@@ -30,7 +30,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-const ENGINE = 'kvtree2';
+const ENGINE = 'kvtree3';
 const PATH = '/dev/shm/pmemkv-nodejs';
 const SIZE = 1024 * 1024 * 8;
 
@@ -290,11 +290,11 @@ describe('KVEngine', () => {
     });
 
     it('uses each test', () => {
-        const kv = new pmemkv.KVEngine("btree", PATH); // todo switch back to ENGINE
+        const kv = new pmemkv.KVEngine(ENGINE, PATH);
         expect(kv.count).to.equal(0);
-        kv.put('1', '2');
-        expect(kv.count).to.equal(1);
         kv.put('RR', '记!');
+        expect(kv.count).to.equal(1);
+        kv.put('1', '2');
         expect(kv.count).to.equal(2);
         let result = '';
         kv.each((k, v) => result += `<${k}>,<${v}>|`);
@@ -303,21 +303,13 @@ describe('KVEngine', () => {
     });
 
     it('uses like test', () => {
-        const kv = new pmemkv.KVEngine("btree", PATH); // todo switch back to ENGINE
-        kv.put('10', '10!');
+        const kv = new pmemkv.KVEngine(ENGINE, PATH);
         kv.put('11', '11!');
+        kv.put('10', '10!');
         kv.put('20', '20!');
         kv.put('21', '21!');
         kv.put('22', '22!');
         kv.put('30', '30!');
-
-        expect(kv.exists_like('.*')).to.be.true;
-        expect(kv.exists_like('A')).to.be.false;
-        expect(kv.exists_like('10')).to.be.true;
-        expect(kv.exists_like('100')).to.be.false;
-        expect(kv.exists_like('1.*')).to.be.true;
-        expect(kv.exists_like('2.*')).to.be.true;
-        expect(kv.exists_like('.*1')).to.be.true;
 
         expect(kv.count_like('.*')).to.equal(6);
         expect(kv.count_like('A')).to.equal(0);
@@ -337,21 +329,10 @@ describe('KVEngine', () => {
     });
 
     it('uses like with bad pattern test', () => {
-        const kv = new pmemkv.KVEngine("btree", PATH); // todo switch back to ENGINE
+        const kv = new pmemkv.KVEngine(ENGINE, PATH);
         kv.put('10', '10');
         kv.put('20', '20');
         kv.put('30', '30');
-
-        expect(kv.exists_like('')).to.be.false;
-        expect(kv.exists_like('*')).to.be.false;
-        expect(kv.exists_like('(')).to.be.false;
-        expect(kv.exists_like(')')).to.be.false;
-        expect(kv.exists_like('()')).to.be.false;
-        expect(kv.exists_like(')(')).to.be.false;
-        expect(kv.exists_like('[')).to.be.false;
-        expect(kv.exists_like(']')).to.be.false;
-        expect(kv.exists_like('[]')).to.be.false;
-        expect(kv.exists_like('][')).to.be.false;
 
         expect(kv.count_like('')).to.equal(0);
         expect(kv.count_like('*')).to.equal(0);
