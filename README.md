@@ -27,18 +27,38 @@ Add npm module to your project:
 npm install pmem/pmemkv-nodejs --save
 ```
 
-## Sample Code
+## Example
 
 We are using `/dev/shm` to
 [emulate persistent memory](http://pmem.io/2016/02/22/pm-emulation.html)
 in this simple example.
 
-```
+```js
 const pmemkv = require('pmemkv');
 
-const kv = new pmemkv.KVEngine('kvtree3', '/dev/shm/mykv');
+function assert(condition) {
+    if (!condition) throw new Error('Assert failed');
+}
+
+console.log('Opening datastore');
+const kv = new pmemkv.KVEngine('kvtree3', '/dev/shm/pmemkv', 1073741824);  // 1 GB pool
+
+console.log('Putting new key');
 kv.put('key1', 'value1');
-expect(kv.get('key1')).to.equal('value1');
+assert(kv.count === 1);
+
+console.log('Reading key back');
+assert(kv.get('key1') === 'value1');
+
+console.log('Iterating existing keys');
+kv.put('key2', 'value2');
+kv.put('key3', 'value3');
+kv.each((k, v) => console.log(`  visited: ${k}`));
+
+console.log('Removing existing key');
 kv.remove('key1');
+assert(!kv.exists('key1'));
+
+console.log('Closing datastore');
 kv.close();
 ```
