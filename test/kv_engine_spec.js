@@ -289,6 +289,19 @@ describe('KVEngine', () => {
         kv.close();
     });
 
+    it('uses all test', () => {
+        const kv = new pmemkv.KVEngine(ENGINE, PATH);
+        expect(kv.count).to.equal(0);
+        kv.put('记!', 'RR');
+        expect(kv.count).to.equal(1);
+        kv.put('2', 'one');
+        expect(kv.count).to.equal(2);
+        let result = '';
+        kv.all((k) => result += `<${k}>,`);
+        expect(result).to.eql('<2>,<记!>,');
+        kv.close();
+    });
+
     it('uses each test', () => {
         const kv = new pmemkv.KVEngine(ENGINE, PATH);
         expect(kv.count).to.equal(0);
