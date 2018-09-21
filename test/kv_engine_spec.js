@@ -70,7 +70,7 @@ describe('KVEngine', () => {
         expect(kv.count).to.equal(0);
         expect(kv.exists('key1')).to.be.false;
         expect(kv.get('key1')).not.to.exist;
-        kv.remove('key1');
+        expect(kv.remove('key1')).to.be.true;
         expect(kv.exists('key1')).to.be.false;
         expect(kv.get('key1')).not.to.exist;
         kv.close();
@@ -216,16 +216,13 @@ describe('KVEngine', () => {
         kv.close();
     });
 
-    it('puts very large value', () => {
-        // todo finish
-    });
-
     it('removes key and value', () => {
         const kv = new pmemkv.KVEngine(ENGINE, PATH);
         kv.put('key1', 'value1');
         expect(kv.exists('key1')).to.be.true;
         expect(kv.get('key1')).to.eql('value1');
-        kv.remove('key1');
+        expect(kv.remove('key1')).to.be.true;
+        expect(kv.remove('key1')).to.be.false;
         expect(kv.exists('key1')).to.be.false;
         expect(kv.get('key1')).not.to.exist;
         kv.close();
