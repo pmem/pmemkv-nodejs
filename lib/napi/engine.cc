@@ -1,5 +1,6 @@
 #include "engine.h"
 #include <assert.h>
+#include <stdio.h>
 
 napi_ref Engine::constructor;
 
@@ -21,8 +22,8 @@ void Engine::Destructor(napi_env env, void* nativeObject, void* /*finalize_hint*
 napi_value Engine::Init(napi_env env, napi_value exports) {
   napi_status status;
   napi_property_descriptor properties[] = {
-      DECLARE_NAPI_METHOD("Put", Put),
-      DECLARE_NAPI_METHOD("Close", Close),
+      DECLARE_NAPI_METHOD("put", Put),
+      DECLARE_NAPI_METHOD("close", Close),
   };
 
   napi_value cons;
@@ -56,8 +57,8 @@ napi_value Engine::New(napi_env env, napi_callback_info info) {
   char path[100] = {'\0'};
   uint32_t size;
 
-  napi_get_value_string_utf8(env, args[0], engine, NAPI_AUTO_LENGTH, NULL);
-  napi_get_value_string_utf8(env, args[1], path, NAPI_AUTO_LENGTH, NULL);
+  napi_get_value_string_utf8(env, args[0], engine, 100, NULL);
+  napi_get_value_string_utf8(env, args[1], path, 100, NULL);
   napi_get_value_uint32(env, args[2], &size);
 
   Engine* kv = new Engine(engine, path, size);
@@ -86,8 +87,8 @@ napi_value Engine::Put(napi_env env, napi_callback_info info) {
   char key[100] = {'\0'};
   char value[100] = {'\0'};
 
-  napi_get_value_string_utf8(env, args[0], key, NAPI_AUTO_LENGTH, NULL);
-  napi_get_value_string_utf8(env, args[1], value, NAPI_AUTO_LENGTH, NULL);
+  napi_get_value_string_utf8(env, args[0], key, 100, NULL);
+  napi_get_value_string_utf8(env, args[1], value, 100, NULL);
 
   Engine* kv;
   status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&kv));
@@ -100,7 +101,7 @@ napi_value Engine::Put(napi_env env, napi_callback_info info) {
 napi_value Engine::Close(napi_env env, napi_callback_info info) {
   napi_status status;
 
-  size_t argc = 0;
+  size_t argc = 2;
   napi_value args[argc];
   napi_value jsthis;
   status = napi_get_cb_info(env, info, &argc, args, &jsthis, nullptr);

@@ -22,7 +22,7 @@ benchmarkFFI = function(){
 
 // napi
 benchmarkNAPI = function(){
-    const kv_napi = new pmemkv_ffi.KVEngine('blackhole', '/dev/shm/pmemkv-napi0', 1073741824);  // 1 GB pool
+    const kv_napi = new pmemkv_napi.KVEngine('blackhole', '/dev/shm/pmemkv-napi0', 1073741824);  // 1 GB pool
     //warmup
     for (var i=0; i<iteration; ++i){
         kv_napi.put('key', 'value');
@@ -35,7 +35,7 @@ benchmarkNAPI = function(){
     kv_napi.close();
 }
 
-var benchmarks = [benchmarkFFI, benchmarkNAPI]
+var benchmarks = [benchmarkNAPI]
 for (key in benchmarks){
     benchmarks[key]();
 }
