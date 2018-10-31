@@ -1,9 +1,6 @@
 const pmemkv_ffi = require('./lib/all.js');
 const pmemkv_napi = require('./lib/napi/build/Release/pmemkv.node');
 const iteration = 100000;
-function assert(condition) {
-    if (!condition) throw new Error('Assert failed');
-}
 
 // node-ffi
 benchmarkFFI = function(){
@@ -35,7 +32,7 @@ benchmarkNAPI = function(){
     kv_napi.close();
 }
 
-var benchmarks = [benchmarkNAPI]
+var benchmarks = [benchmarkFFI, benchmarkNAPI]
 for (key in benchmarks){
     benchmarks[key]();
 }
