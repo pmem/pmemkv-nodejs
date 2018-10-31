@@ -3,7 +3,7 @@ const pmemkv_napi = require('./lib/napi/build/Release/pmemkv.node');
 const iteration = 100000;
 
 // node-ffi
-benchmarkFFI = function(){
+var benchmarkFFI = function(){
     const kv_ffi = new pmemkv_ffi.KVEngine('blackhole', '/dev/shm/pmemkv-ffi0', 1073741824);  // 1 GB pool
     // warmup
     for (var i=0; i<iteration; ++i){
@@ -18,7 +18,7 @@ benchmarkFFI = function(){
 }
 
 // napi
-benchmarkNAPI = function(){
+var benchmarkNAPI = function(){
     const kv_napi = new pmemkv_napi.KVEngine('blackhole', '/dev/shm/pmemkv-napi0', 1073741824);  // 1 GB pool
     //warmup
     for (var i=0; i<iteration; ++i){
