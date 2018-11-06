@@ -7,16 +7,18 @@
 using namespace pmemkv;
 
 int main() {
-    KVEngine* kv = KVEngine::Open("blackhole", "/dev/shm/pmemkv-native", 1073741824);  // 1 GB pool
+    KVEngine* kv = kvengine_open("blackhole", "/dev/shm/pmemkv", 1073741824);
     int iteration = 100000;
     struct timeval start, end;
     // warmup
+    const char* key = "key";
+    const char* value = "value";
     for (int i=0; i<iteration; ++i){
-        KVStatus s = kv->Put("key", "value");
+        int8_t s = kvengine_put(kv, strlen(key), key, strlen(value), value);
     }
     gettimeofday(&start, NULL);
     for (int i=0; i<iteration; ++i){
-        KVStatus s = kv->Put("key", "value");
+        int8_t s = kvengine_put(kv, strlen(key), key, strlen(value), value);
     }
     gettimeofday(&end, NULL);
     
