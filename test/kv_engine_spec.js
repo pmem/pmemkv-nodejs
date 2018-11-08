@@ -33,6 +33,7 @@
 const ENGINE = 'kvtree3';
 const PATH = '/dev/shm/pmemkv-nodejs';
 const SIZE = 1024 * 1024 * 8;
+const CONFIG = `{"path":"${PATH}","size":${SIZE}}`;
 
 const chai = require('chai');
 chai.use(require('chai-string'));
@@ -62,7 +63,7 @@ describe('KVEngine', () => {
     });
 
     it('uses blackhole engine', () => {
-        const kv = new pmemkv.KVEngine('blackhole', PATH);
+        const kv = new pmemkv.KVEngine('blackhole', CONFIG);
         expect(kv.count).to.equal(0);
         expect(kv.exists('key1')).to.be.false;
         expect(kv.get('key1')).not.to.exist;
@@ -73,84 +74,84 @@ describe('KVEngine', () => {
         expect(kv.remove('key1')).to.be.true;
         expect(kv.exists('key1')).to.be.false;
         expect(kv.get('key1')).not.to.exist;
-        kv.close();
+        kv.stop();
     });
 
-    it('creates instance', () => {
+    it('starts engine', () => {
         const size = 1024 * 1024 * 11;
-        const kv = new pmemkv.KVEngine(ENGINE, PATH, size);
+        const kv = new pmemkv.KVEngine(ENGINE, CONFIG);
         kv['_kv'] = undefined;
         expect(kv['_kv']).to.exist;
-        expect(kv.closed).to.be.false;
-        kv.close();
-        kv['_closed'] = false;
-        expect(kv['_closed']).to.be.true;
-        expect(kv.closed).to.be.true;
+        expect(kv.stopped).to.be.false;
+        kv.stop();
+        kv['_stopped'] = false;
+        expect(kv['_stopped']).to.be.true;
+        expect(kv.stopped).to.be.true;
     });
 
-    it('creates instance from existing pool', () => {
+    it('starts engine with existing pool', () => {
         const size = 1024 * 1024 * 13;
-        let kv = new pmemkv.KVEngine(ENGINE, PATH, size);
-        kv.close();
-        expect(kv.closed).to.be.true;
-        kv = new pmemkv.KVEngine(ENGINE, PATH, 0);
-        expect(kv.closed).to.be.false;
-        kv.close();
-        expect(kv.closed).to.be.true;
+        let kv = new pmemkv.KVEngine(ENGINE, CONFIG);
+        kv.stop();
+        expect(kv.stopped).to.be.true;
+        kv = new pmemkv.KVEngine(ENGINE, CONFIG);
+        expect(kv.stopped).to.be.false;
+        kv.stop();
+        expect(kv.stopped).to.be.true;
     });
 
-    it('closes instance multiple times', () => {
-        const kv = new pmemkv.KVEngine(ENGINE, PATH);
-        expect(kv.closed).to.be.false;
-        kv.close();
-        expect(kv.closed).to.be.true;
-        kv.close();
-        expect(kv.closed).to.be.true;
-        kv.close();
-        expect(kv.closed).to.be.true;
+    it('stops engine multiple times', () => {
+        const kv = new pmemkv.KVEngine(ENGINE, CONFIG);
+        expect(kv.stopped).to.be.false;
+        kv.stop();
+        expect(kv.stopped).to.be.true;
+        kv.stop();
+        expect(kv.stopped).to.be.true;
+        kv.stop();
+        expect(kv.stopped).to.be.true;
     });
 
     it('gets missing key', () => {
-        const kv = new pmemkv.KVEngine(ENGINE, PATH);
+        const kv = new pmemkv.KVEngine(ENGINE, CONFIG);
         expect(kv.exists('key1')).to.be.false;
         expect(kv.get('key1')).not.to.exist;
-        kv.close();
+        kv.stop();
     });
 
     it('puts basic value', () => {
-        const kv = new pmemkv.KVEngine(ENGINE, PATH);
+        const kv = new pmemkv.KVEngine(ENGINE, CONFIG);
         expect(kv.exists('key1')).to.be.false;
         kv.put('key1', 'value1');
         expect(kv.exists('key1')).to.be.true;
         expect(kv.get('key1')).to.equal('value1');
-        kv.close();
+        kv.stop();
     });
 
     it('puts binary key', () => {
-        const kv = new pmemkv.KVEngine(ENGINE, PATH);
+        const kv = new pmemkv.KVEngine(ENGINE, CONFIG);
         kv.put("A\0B\0\0C", 'value1');
         expect(kv.exists("A\0B\0\0C")).to.be.true;
         expect(kv.get("A\0B\0\0C")).to.equal('value1');
-        kv.close();
+        kv.stop();
     });
 
     it('puts binary value', () => {
-        const kv = new pmemkv.KVEngine(ENGINE, PATH);
+        const kv = new pmemkv.KVEngine(ENGINE, CONFIG);
         kv.put('key1', "A\0B\0\0C");
         expect(kv.get('key1')).to.equal("A\0B\0\0C");
-        kv.close();
+        kv.stop();
     });
 
     it('puts complex value', () => {
-        const kv = new pmemkv.KVEngine(ENGINE, PATH);
+        const kv = new pmemkv.KVEngine(ENGINE, CONFIG);
         const val = 'one\ttwo or <p>three</p>\n {four}   and ^five';
         kv.put('key1', val);
         expect(kv.get('key1')).to.equal(val);
-        kv.close();
+        kv.stop();
     });
 
     it('puts empty key', () => {
-        const kv = new pmemkv.KVEngine(ENGINE, PATH);
+        const kv = new pmemkv.KVEngine(ENGINE, CONFIG);
         kv.put('', 'empty');
         kv.put(' ', 'single-space');
         kv.put('\t\t', 'two-tab');
@@ -160,22 +161,22 @@ describe('KVEngine', () => {
         expect(kv.get(' ')).to.equal('single-space');
         expect(kv.exists('\t\t')).to.be.true;
         expect(kv.get('\t\t')).to.equal('two-tab');
-        kv.close();
+        kv.stop();
     });
 
     it('puts empty value', () => {
-        const kv = new pmemkv.KVEngine(ENGINE, PATH);
+        const kv = new pmemkv.KVEngine(ENGINE, CONFIG);
         kv.put('empty', '');
         kv.put('single-space', ' ');
         kv.put('two-tab', '\t\t');
         expect(kv.get('empty')).to.equal('');
         expect(kv.get('single-space')).to.equal(' ');
         expect(kv.get('two-tab')).to.equal('\t\t');
-        kv.close();
+        kv.stop();
     });
 
     it('puts multiple values', () => {
-        const kv = new pmemkv.KVEngine(ENGINE, PATH);
+        const kv = new pmemkv.KVEngine(ENGINE, CONFIG);
         kv.put('key1', 'value1');
         kv.put('key2', 'value2');
         kv.put('key3', 'value3');
@@ -185,39 +186,39 @@ describe('KVEngine', () => {
         expect(kv.get('key2')).to.equal('value2');
         expect(kv.exists('key3')).to.be.true;
         expect(kv.get('key3')).to.equal('value3');
-        kv.close();
+        kv.stop();
     });
 
     it('puts overwriting existing value', () => {
-        const kv = new pmemkv.KVEngine(ENGINE, PATH);
+        const kv = new pmemkv.KVEngine(ENGINE, CONFIG);
         kv.put('key1', 'value1');
         expect(kv.get('key1')).to.equal('value1');
         kv.put('key1', 'value123');
         expect(kv.get('key1')).to.equal('value123');
         kv.put('key1', 'asdf');
         expect(kv.get('key1')).to.equal('asdf');
-        kv.close();
+        kv.stop();
     });
 
     it('puts utf-8 key', () => {
-        const kv = new pmemkv.KVEngine(ENGINE, PATH);
+        const kv = new pmemkv.KVEngine(ENGINE, CONFIG);
         const val = 'to remember, note, record';
         kv.put('记', val);
         expect(kv.exists('记')).to.be.true;
         expect(kv.get('记')).to.equal(val);
-        kv.close();
+        kv.stop();
     });
 
     it('puts utf-8 value', () => {
-        const kv = new pmemkv.KVEngine(ENGINE, PATH);
+        const kv = new pmemkv.KVEngine(ENGINE, CONFIG);
         const val = '记 means to remember, note, record';
         kv.put('key1', val);
         expect(kv.get('key1')).to.equal(val);
-        kv.close();
+        kv.stop();
     });
 
     it('removes key and value', () => {
-        const kv = new pmemkv.KVEngine(ENGINE, PATH);
+        const kv = new pmemkv.KVEngine(ENGINE, CONFIG);
         kv.put('key1', 'value1');
         expect(kv.exists('key1')).to.be.true;
         expect(kv.get('key1')).to.eql('value1');
@@ -225,55 +226,58 @@ describe('KVEngine', () => {
         expect(kv.remove('key1')).to.be.false;
         expect(kv.exists('key1')).to.be.false;
         expect(kv.get('key1')).not.to.exist;
-        kv.close();
+        kv.stop();
     });
 
-    it('throws exception on create when engine is invalid', () => {
+    it('throws exception on start when engine is invalid', () => {
         let kv = undefined;
         try {
-            kv = new pmemkv.KVEngine('nope.nope', PATH);
+            kv = new pmemkv.KVEngine('nope.nope', CONFIG);
             expect(true).to.be.false;
         } catch (e) {
-            expect(e.message).to.equal('unable to open persistent pool');
+            expect(e.message).to.equal('unable to start engine');
         }
         expect(kv).not.to.exist;
     });
 
-    it('throws exception on create when path is invalid', () => {
+    it('throws exception on start when path is invalid', () => {
         let kv = undefined;
         try {
-            kv = new pmemkv.KVEngine(ENGINE, '/tmp/123/234/345/456/567/678/nope.nope');
+            let config = `{"path":"/tmp/123/234/345/456/567/678/nope.nope","size":${SIZE}}`;
+            kv = new pmemkv.KVEngine(ENGINE, config);
             expect(true).to.be.false;
         } catch (e) {
-            expect(e.message).to.equal('unable to open persistent pool');
+            expect(e.message).to.equal('unable to start engine');
         }
         expect(kv).not.to.exist;
     });
 
-    it('throws exception on create with huge size', () => {
+    it('throws exception on start with huge size', () => {
         let kv = undefined;
         try {
-            kv = new pmemkv.KVEngine(ENGINE, PATH, 9223372036854775807); // 9.22 exabytes
+            let config = `{"path":"${PATH}","size":9223372036854775807}`; // 9.22 exabytes
+            kv = new pmemkv.KVEngine(ENGINE, config);
             expect(true).to.be.false;
         } catch (e) {
-            expect(e.message).to.equal('unable to open persistent pool');
+            expect(e.message).to.equal('unable to start engine');
         }
         expect(kv).not.to.exist;
     });
 
-    it('throws exception on create with tiny size', () => {
+    it('throws exception on start with tiny size', () => {
         let kv = undefined;
         try {
-            kv = new pmemkv.KVEngine(ENGINE, PATH, SIZE - 1); // too small
+            let config = `{"path":"${PATH}","size":${SIZE - 1}}`; // too small
+            kv = new pmemkv.KVEngine(ENGINE, config);
             expect(true).to.be.false;
         } catch (e) {
-            expect(e.message).to.equal('unable to open persistent pool');
+            expect(e.message).to.equal('unable to start engine');
         }
         expect(kv).not.to.exist;
     });
 
     it('throws exception on put when out of space', () => {
-        const kv = new pmemkv.KVEngine(ENGINE, PATH);
+        const kv = new pmemkv.KVEngine(ENGINE, CONFIG);
         try {
             for (let i = 0; i < 100000; i++) {
                 const istr = i.toString();
@@ -283,11 +287,11 @@ describe('KVEngine', () => {
         } catch (e) {
             expect(e.message).to.startWith('unable to put key:');
         }
-        kv.close();
+        kv.stop();
     });
 
     it('uses all test', () => {
-        const kv = new pmemkv.KVEngine(ENGINE, PATH);
+        const kv = new pmemkv.KVEngine(ENGINE, CONFIG);
         expect(kv.count).to.equal(0);
         kv.put('记!', 'RR');
         expect(kv.count).to.equal(1);
@@ -296,11 +300,11 @@ describe('KVEngine', () => {
         let result = '';
         kv.all((k) => result += `<${k}>,`);
         expect(result).to.eql('<2>,<记!>,');
-        kv.close();
+        kv.stop();
     });
 
     it('uses each test', () => {
-        const kv = new pmemkv.KVEngine(ENGINE, PATH);
+        const kv = new pmemkv.KVEngine(ENGINE, CONFIG);
         expect(kv.count).to.equal(0);
         kv.put('RR', '记!');
         expect(kv.count).to.equal(1);
@@ -309,7 +313,7 @@ describe('KVEngine', () => {
         let result = '';
         kv.each((k, v) => result += `<${k}>,<${v}>|`);
         expect(result).to.eql('<1>,<2>|<RR>,<记!>|');
-        kv.close();
+        kv.stop();
     });
 
 });
