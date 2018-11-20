@@ -229,6 +229,28 @@ describe('KVEngine', () => {
         kv.stop();
     });
 
+    it('throws exception on start when config is empty', () => {
+        let kv = undefined;
+        try {
+            kv = new pmemkv.KVEngine(ENGINE, "{}");
+            expect(true).to.be.false;
+        } catch (e) {
+            expect(e.message).to.equal('unable to start engine');
+        }
+        expect(kv).not.to.exist;
+    });
+
+    it('throws exception on start when config is malformed', () => {
+        let kv = undefined;
+        try {
+            kv = new pmemkv.KVEngine(ENGINE, "{");
+            expect(true).to.be.false;
+        } catch (e) {
+            expect(e.message).to.equal('unable to start engine');
+        }
+        expect(kv).not.to.exist;
+    });
+
     it('throws exception on start when engine is invalid', () => {
         let kv = undefined;
         try {
@@ -244,6 +266,42 @@ describe('KVEngine', () => {
         let kv = undefined;
         try {
             let config = `{"path":"/tmp/123/234/345/456/567/678/nope.nope","size":${SIZE}}`;
+            kv = new pmemkv.KVEngine(ENGINE, config);
+            expect(true).to.be.false;
+        } catch (e) {
+            expect(e.message).to.equal('unable to start engine');
+        }
+        expect(kv).not.to.exist;
+    });
+
+    it('throws exception on start when path is missing', () => {
+        let kv = undefined;
+        try {
+            let config = `{"size":${SIZE}}`;
+            kv = new pmemkv.KVEngine(ENGINE, config);
+            expect(true).to.be.false;
+        } catch (e) {
+            expect(e.message).to.equal('unable to start engine');
+        }
+        expect(kv).not.to.exist;
+    });
+
+    it('throws exception on start when path is wrong type', () => {
+        let kv = undefined;
+        try {
+            let config = '{"path":1234}';
+            kv = new pmemkv.KVEngine(ENGINE, config);
+            expect(true).to.be.false;
+        } catch (e) {
+            expect(e.message).to.equal('unable to start engine');
+        }
+        expect(kv).not.to.exist;
+    });
+
+    it('throws exception on start when size is wrong type', () => {
+        let kv = undefined;
+        try {
+            let config = `{"path":"${PATH}","size":\"${SIZE}\"}`;
             kv = new pmemkv.KVEngine(ENGINE, config);
             expect(true).to.be.false;
         } catch (e) {
