@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "engine.h"
 using namespace Nan;
 using namespace v8;
@@ -26,15 +27,13 @@ void Engine::Init(v8::Local<v8::Object> exports) {
 }
 
 void Engine::New(const Nan::FunctionCallbackInfo<v8::Value>& info) {
-    // Invoked as constructor: `new MyObject(...)`
     String::Utf8Value engine(info[0]);
     String::Utf8Value path(info[1]);
-    uint32_t size = info[2]->IsUndefined() ? 0 : info[0]->NumberValue();
+    uint32_t size = info[2]->IsUndefined() ? 0 : info[2]->NumberValue();
 
     Engine* obj = new Engine(*engine, *path, size);
     obj->Wrap(info.This());
     info.GetReturnValue().Set(info.This());
-
 }
 
 void Engine::Put(const Nan::FunctionCallbackInfo<v8::Value>& info) {
