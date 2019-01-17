@@ -2,10 +2,13 @@
   "targets": [
     {
       "target_name": "pmemkv",
-      "sources": ["engine.cc", "pmemkv.cc"],
+      "sources": ["kvengine.cc", "pmemkv.cc"],
       "include_dirs": [
-        "/usr/local",
-        "/usr"
+          "<!@(node -p \"require('node-addon-api').include\")"
+      ],
+      
+      "dependencies": [
+          "<!(node -p \"require('node-addon-api').gyp\")"
       ],
        "libraries": [
         "-lpmemkv",

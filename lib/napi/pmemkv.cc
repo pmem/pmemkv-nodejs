@@ -1,7 +1,8 @@
-#include "engine.h"
+#include <napi.h>
+#include "kvengine.h"
 
-napi_value Init(napi_env env, napi_value exports) {
-  return Engine::Init(env, exports);
+Napi::Object initAll(Napi::Env env, Napi::Object exports) {
+  return KVEngine::init(env, exports);
 }
 
-NAPI_MODULE(pmemkv, Init)
+NODE_API_MODULE(pmemkv, initAll)

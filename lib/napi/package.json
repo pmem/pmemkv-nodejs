@@ -1,0 +1,11 @@
+{
+	"name": "pmemkv-nodejs",
+	"description": "Node.js bindings for pmemkv",
+	"version": "0.0.1",
+	"dependencies": {
+		"node-addon-api": "*",
+		"node-gyp": "^3.6.2",
+		"bindings": "^1.2.1"
+	},
+	"license": "BSD-3-Clause"
+}
