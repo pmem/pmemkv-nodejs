@@ -14,7 +14,6 @@ class KVEngine : public Napi::ObjectWrap<KVEngine> {
   static Napi::FunctionReference constructor;
 
   Napi::Value close(const Napi::CallbackInfo& info);
-  Napi::Value closed(const Napi::CallbackInfo& info);
   Napi::Value count(const Napi::CallbackInfo& info);
   Napi::Value all(const Napi::CallbackInfo& info);
   Napi::Value each(const Napi::CallbackInfo& info);
@@ -24,8 +23,6 @@ class KVEngine : public Napi::ObjectWrap<KVEngine> {
   Napi::Value remove(const Napi::CallbackInfo& info);
   
   pmemkv::KVEngine* _kv;
-  bool _closed;
-  Napi::Function _cb;
 };
 
 #endif
