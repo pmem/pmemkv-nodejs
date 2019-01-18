@@ -10,11 +10,11 @@ var benchmarkFFI = function(){
         kv_ffi.put('key', 'value');
     }
 
-    console.time('ffi');
+    console.time('ffi: put()');
     for (var i=0; i<iteration; ++i){
         kv_ffi.put('key', 'value');
     }
-    console.timeEnd('ffi');
+    console.timeEnd('ffi: put()');
     kv_ffi.close();
 }
 
@@ -26,11 +26,11 @@ var benchmarkNAPI = function(){
         kv_napi.put('key', 'value');
     }
 
-    console.time('napi');
+    console.time('napi: put()');
     for (var i=0; i<iteration; ++i){
         kv_napi.put('key', 'value');
     }
-    console.timeEnd('napi');
+    console.timeEnd('napi: put()');
     kv_napi.close();
 }
 
