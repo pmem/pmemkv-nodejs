@@ -8,7 +8,6 @@
   },
   "scripts": {
     "test": "mocha --reporter spec",
-    "install": "npm install && npm install ./lib/napi"
   },
   "repository": {
     "type": "git",
