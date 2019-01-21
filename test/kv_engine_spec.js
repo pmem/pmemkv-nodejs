@@ -343,7 +343,7 @@ describe('KVEngine', () => {
             }
             expect(true).to.be.false;
         } catch (e) {
-            expect(e.message).to.startWith('unable to put key:');
+            expect(e.message).to.equal('Unable to put key');
         }
         kv.stop();
     });
