@@ -225,7 +225,7 @@ describe('KVEngine', () => {
         const kv = new pmemkv.KVEngine(ENGINE, CONFIG);
         kv.put('key1', 'value1');
         expect(kv.exists('key1')).to.be.true;
-        expect(kv.get('key1')).to.eql('value1');
+        expect(kv.get('key1')).to.equal('value1');
         expect(kv.remove('key1')).to.be.true;
         expect(kv.remove('key1')).to.be.false;
         expect(kv.exists('key1')).to.be.false;
@@ -239,7 +239,7 @@ describe('KVEngine', () => {
             kv = new pmemkv.KVEngine(ENGINE, "{}");
             expect(true).to.be.false;
         } catch (e) {
-            expect(e.message).to.equal('unable to start engine');
+            expect(e.message).to.equal('Config does not include valid path string');
         }
         expect(kv).not.to.exist;
     });
@@ -250,7 +250,7 @@ describe('KVEngine', () => {
             kv = new pmemkv.KVEngine(ENGINE, "{");
             expect(true).to.be.false;
         } catch (e) {
-            expect(e.message).to.equal('unable to start engine');
+            expect(e.message).to.equal('Config could not be parsed as JSON');
         }
         expect(kv).not.to.exist;
     });
@@ -261,7 +261,7 @@ describe('KVEngine', () => {
             kv = new pmemkv.KVEngine('nope.nope', CONFIG);
             expect(true).to.be.false;
         } catch (e) {
-            expect(e.message).to.equal('unable to start engine');
+            expect(e.message).to.equal('Unknown engine name');
         }
         expect(kv).not.to.exist;
     });
@@ -273,7 +273,7 @@ describe('KVEngine', () => {
             kv = new pmemkv.KVEngine(ENGINE, config);
             expect(true).to.be.false;
         } catch (e) {
-            expect(e.message).to.equal('unable to start engine');
+            expect(e.message).to.equal('Failed creating pool');
         }
         expect(kv).not.to.exist;
     });
@@ -285,7 +285,7 @@ describe('KVEngine', () => {
             kv = new pmemkv.KVEngine(ENGINE, config);
             expect(true).to.be.false;
         } catch (e) {
-            expect(e.message).to.equal('unable to start engine');
+            expect(e.message).to.equal('Config does not include valid path string');
         }
         expect(kv).not.to.exist;
     });
@@ -297,7 +297,7 @@ describe('KVEngine', () => {
             kv = new pmemkv.KVEngine(ENGINE, config);
             expect(true).to.be.false;
         } catch (e) {
-            expect(e.message).to.equal('unable to start engine');
+            expect(e.message).to.equal('Config does not include valid path string');
         }
         expect(kv).not.to.exist;
     });
@@ -309,7 +309,7 @@ describe('KVEngine', () => {
             kv = new pmemkv.KVEngine(ENGINE, config);
             expect(true).to.be.false;
         } catch (e) {
-            expect(e.message).to.equal('unable to start engine');
+            expect(e.message).to.equal('Config does not include valid size integer');
         }
         expect(kv).not.to.exist;
     });
@@ -321,7 +321,7 @@ describe('KVEngine', () => {
             kv = new pmemkv.KVEngine(ENGINE, config);
             expect(true).to.be.false;
         } catch (e) {
-            expect(e.message).to.equal('unable to start engine');
+            expect(e.message).to.equal('Failed creating pool');
         }
         expect(kv).not.to.exist;
     });
@@ -333,7 +333,7 @@ describe('KVEngine', () => {
             kv = new pmemkv.KVEngine(ENGINE, config);
             expect(true).to.be.false;
         } catch (e) {
-            expect(e.message).to.equal('unable to start engine');
+            expect(e.message).to.equal('Failed creating pool');
         }
         expect(kv).not.to.exist;
     });
@@ -347,7 +347,7 @@ describe('KVEngine', () => {
             }
             expect(true).to.be.false;
         } catch (e) {
-            expect(e.message).to.startWith('unable to put key:');
+            expect(e.message).to.equal('Unable to put key');
         }
         kv.stop();
     });
@@ -361,7 +361,7 @@ describe('KVEngine', () => {
         expect(kv.count).to.equal(2);
         let result = '';
         kv.all((k) => result += `<${k}>,`);
-        expect(result).to.eql('<2>,<记!>,');
+        expect(result).to.equal('<2>,<记!>,');
         kv.stop();
     });
 
@@ -374,7 +374,7 @@ describe('KVEngine', () => {
         expect(kv.count).to.equal(2);
         let result = '';
         kv.each((k, v) => result += `<${k}>,<${v}>|`);
-        expect(result).to.eql('<1>,<2>|<RR>,<记!>|');
+        expect(result).to.equal('<1>,<2>|<RR>,<记!>|');
         kv.stop();
     });
 
