@@ -39,7 +39,11 @@ const chai = require('chai');
 chai.use(require('chai-string'));
 const expect = chai.expect;
 const fs = require('fs');
-const pmemkv = require('../lib/all');
+var require_path = '../lib/all';
+if (process.env.npm_config_BINDING == 'NAPI'){
+    require_path = 'pmemkv-napi';
+}
+const pmemkv = require(require_path);
 
 function clean() {
     if (fs.existsSync(PATH)) fs.unlinkSync(PATH);
