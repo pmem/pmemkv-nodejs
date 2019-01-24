@@ -14,7 +14,7 @@
     "url": "git+https://github.com/pmem/pmemkv-nodejs.git"
   },
   "author": "Rob Dickinson (https://github.com/RobDickinson)",
-  "license": "Apache-2.0",
+  "license": "BSD-3-Clause",
   "bugs": {
     "url": "https://github.com/pmem/pmemkv-nodejs/issues"
   },
