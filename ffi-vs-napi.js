@@ -1,5 +1,5 @@
 const pmemkv_ffi = require('./lib/all.js');
-const pmemkv_napi = require('./lib/napi/all.js');
+const pmemkv_napi = require('pmemkv-napi');
 const iteration = 100000;
 
 // node-ffi
