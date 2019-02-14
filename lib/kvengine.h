@@ -30,58 +30,31 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-const pmemkv = require('bindings')('pmemkv');
+#ifndef ENGINE_H
+#define ENGINE_H
 
-class KVEngine {
+#include <iostream>
+#include <libpmemkv.h>
+#include <napi.h>
 
-    constructor(engine, config) {
-        this._stopped = false;
-        const cb = function (context, engine, config, msg) {
-            throw new Error(msg);
-        }
-        this._kv = new pmemkv.KVEngine(engine, config, cb);
-        Object.defineProperty(this, '_kv', {configurable: false, writable: false});
-    }
+class KVEngine : public Napi::ObjectWrap<KVEngine> {
+ public:
+  static Napi::Object init(Napi::Env env, Napi::Object exports);
+  KVEngine(const Napi::CallbackInfo& info);
 
-    stop() {
-        if (!this._stopped) {
-            this._stopped = true;
-            Object.defineProperty(this, '_stopped', {configurable: false, writable: false});
-            this._kv.stop();
-        }
-    }
+ private:
+  static Napi::FunctionReference constructor;
 
-    get stopped() {
-        return this._stopped;
-    }
+  Napi::Value stop(const Napi::CallbackInfo& info);
+  Napi::Value count(const Napi::CallbackInfo& info);
+  Napi::Value all(const Napi::CallbackInfo& info);
+  Napi::Value each(const Napi::CallbackInfo& info);
+  Napi::Value exists(const Napi::CallbackInfo& info);
+  Napi::Value get(const Napi::CallbackInfo& info);
+  Napi::Value put(const Napi::CallbackInfo& info);
+  Napi::Value remove(const Napi::CallbackInfo& info);
 
-    all(callback) {
-        this._kv.all(callback);
-    }
+  pmemkv::KVEngine* _kv;
+};
 
-    get count() {
-        return this._kv.count();
-    }
-
-    each(callback) {
-        this._kv.each(callback)
-    }
-
-    exists(key) {
-        return this._kv.exists(key);
-    }
-
-    get(key) {
-        return this._kv.get(key);
-    }
-
-    put(key, value) {
-        this._kv.put(key, value);
-    }
-
-    remove(key) {
-        return this._kv.remove(key);
-    }
-}
-
-module.exports = KVEngine;
+#endif
