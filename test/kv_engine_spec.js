@@ -30,35 +30,24 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-const ENGINE = 'kvtree3';
-const PATH = '/dev/shm/pmemkv-nodejs';
-const SIZE = 1024 * 1024 * 8;
-const CONFIG = `{"path":"${PATH}","size":${SIZE}}`;
+const ENGINE = 'vmap';
+const CONFIG = `{"path":"/dev/shm"}`;
 
 const chai = require('chai');
 chai.use(require('chai-string'));
 const expect = chai.expect;
+<<<<<<< HEAD
 const fs = require('fs');
 var require_path = '../lib/all';
 if (process.env.npm_config_BINDING == 'NAPI'){
     require_path = 'pmemkv-napi';
 }
 const pmemkv = require(require_path);
-
-function clean() {
-    if (fs.existsSync(PATH)) fs.unlinkSync(PATH);
-    expect(fs.existsSync(PATH)).to.be.false;
-}
+=======
+const pmemkv = require('../lib/all');
+>>>>>>> 0fe9d0fb374e16fa94ef3191d43a5d016419b958
 
 describe('KVEngine', () => {
-
-    beforeEach(() => {
-        clean();
-    });
-
-    afterEach(() => {
-        clean();
-    });
 
     it('uses module to publish types', () => {
         expect(pmemkv.KVEngine).to.exist;
@@ -82,7 +71,6 @@ describe('KVEngine', () => {
     });
 
     it('starts engine', () => {
-        const size = 1024 * 1024 * 11;
         const kv = new pmemkv.KVEngine(ENGINE, CONFIG);
         kv['_kv'] = undefined;
         expect(kv['_kv']).to.exist;
@@ -90,17 +78,6 @@ describe('KVEngine', () => {
         kv.stop();
         kv['_stopped'] = false;
         expect(kv['_stopped']).to.be.true;
-        expect(kv.stopped).to.be.true;
-    });
-
-    it('starts engine with existing pool', () => {
-        const size = 1024 * 1024 * 13;
-        let kv = new pmemkv.KVEngine(ENGINE, CONFIG);
-        kv.stop();
-        expect(kv.stopped).to.be.true;
-        kv = new pmemkv.KVEngine(ENGINE, CONFIG);
-        expect(kv.stopped).to.be.false;
-        kv.stop();
         expect(kv.stopped).to.be.true;
     });
 
@@ -269,23 +246,11 @@ describe('KVEngine', () => {
     it('throws exception on start when path is invalid', () => {
         let kv = undefined;
         try {
-            let config = `{"path":"/tmp/123/234/345/456/567/678/nope.nope","size":${SIZE}}`;
+            let config = `{"path":"/tmp/123/234/345/456/567/678/nope.nope"}`;
             kv = new pmemkv.KVEngine(ENGINE, config);
             expect(true).to.be.false;
         } catch (e) {
-            expect(e.message).to.equal('Failed creating pool');
-        }
-        expect(kv).not.to.exist;
-    });
-
-    it('throws exception on start when path is missing', () => {
-        let kv = undefined;
-        try {
-            let config = `{"size":${SIZE}}`;
-            kv = new pmemkv.KVEngine(ENGINE, config);
-            expect(true).to.be.false;
-        } catch (e) {
-            expect(e.message).to.equal('Config does not include valid path string');
+            expect(e.message).to.equal('Config path is not an existing directory');
         }
         expect(kv).not.to.exist;
     });
@@ -300,56 +265,6 @@ describe('KVEngine', () => {
             expect(e.message).to.equal('Config does not include valid path string');
         }
         expect(kv).not.to.exist;
-    });
-
-    it('throws exception on start when size is wrong type', () => {
-        let kv = undefined;
-        try {
-            let config = `{"path":"${PATH}","size":\"${SIZE}\"}`;
-            kv = new pmemkv.KVEngine(ENGINE, config);
-            expect(true).to.be.false;
-        } catch (e) {
-            expect(e.message).to.equal('Config does not include valid size integer');
-        }
-        expect(kv).not.to.exist;
-    });
-
-    it('throws exception on start with huge size', () => {
-        let kv = undefined;
-        try {
-            let config = `{"path":"${PATH}","size":9223372036854775807}`; // 9.22 exabytes
-            kv = new pmemkv.KVEngine(ENGINE, config);
-            expect(true).to.be.false;
-        } catch (e) {
-            expect(e.message).to.equal('Failed creating pool');
-        }
-        expect(kv).not.to.exist;
-    });
-
-    it('throws exception on start with tiny size', () => {
-        let kv = undefined;
-        try {
-            let config = `{"path":"${PATH}","size":${SIZE - 1}}`; // too small
-            kv = new pmemkv.KVEngine(ENGINE, config);
-            expect(true).to.be.false;
-        } catch (e) {
-            expect(e.message).to.equal('Failed creating pool');
-        }
-        expect(kv).not.to.exist;
-    });
-
-    it('throws exception on put when out of space', () => {
-        const kv = new pmemkv.KVEngine(ENGINE, CONFIG);
-        try {
-            for (let i = 0; i < 100000; i++) {
-                const istr = i.toString();
-                kv.put(istr, istr);
-            }
-            expect(true).to.be.false;
-        } catch (e) {
-            expect(e.message).to.equal('Unable to put key');
-        }
-        kv.stop();
     });
 
     it('uses all test', () => {
