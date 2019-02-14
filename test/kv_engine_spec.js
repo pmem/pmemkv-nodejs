@@ -36,16 +36,7 @@ const CONFIG = `{"path":"/dev/shm"}`;
 const chai = require('chai');
 chai.use(require('chai-string'));
 const expect = chai.expect;
-<<<<<<< HEAD
-const fs = require('fs');
-var require_path = '../lib/all';
-if (process.env.npm_config_BINDING == 'NAPI'){
-    require_path = 'pmemkv-napi';
-}
-const pmemkv = require(require_path);
-=======
 const pmemkv = require('../lib/all');
->>>>>>> 0fe9d0fb374e16fa94ef3191d43a5d016419b958
 
 describe('KVEngine', () => {
 
