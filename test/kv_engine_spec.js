@@ -260,27 +260,205 @@ describe('KVEngine', () => {
 
     it('uses all test', () => {
         const kv = new pmemkv.KVEngine(ENGINE, CONFIG);
-        expect(kv.count).to.equal(0);
+        kv.put('1', 'one');
+        kv.put('2', 'two');
         kv.put('记!', 'RR');
-        expect(kv.count).to.equal(1);
-        kv.put('2', 'one');
-        expect(kv.count).to.equal(2);
-        let result = '';
-        kv.all((k) => result += `<${k}>,`);
-        expect(result).to.equal('<2>,<记!>,');
+
+        let x = '';
+        kv.all((k) => x += `<${k}>,`);
+        expect(x).to.equal('<1>,<2>,<记!>,');
+
+        kv.stop();
+    });
+
+    it('uses all above test', () => {
+        const kv = new pmemkv.KVEngine(ENGINE, CONFIG);
+        kv.put('A', '1');
+        kv.put('AB', '2');
+        kv.put('AC', '3');
+        kv.put('B', '4');
+        kv.put('BB', '5');
+        kv.put('BC', '6');
+        kv.put('记!', 'RR');
+
+        let x = '';
+        kv.all_above('B', (k) => x += `${k},`);
+        expect(x).to.equal('BB,BC,记!,');
+
+        x = '';
+        kv.all_above('', (k) => x += `${k},`);
+        expect(x).to.equal('A,AB,AC,B,BB,BC,记!,');
+
+        kv.stop();
+    });
+
+    it('uses all below test', () => {
+        const kv = new pmemkv.KVEngine(ENGINE, CONFIG);
+        kv.put('A', '1');
+        kv.put('AB', '2');
+        kv.put('AC', '3');
+        kv.put('B', '4');
+        kv.put('BB', '5');
+        kv.put('BC', '6');
+        kv.put('记!', 'RR');
+
+        let x = '';
+        kv.all_below('B', (k) => x += `${k},`);
+        expect(x).to.equal('A,AB,AC,');
+
+        x = '';
+        kv.all_below('\uFFFF', (k) => x += `${k},`);
+        expect(x).to.equal('A,AB,AC,B,BB,BC,记!,');
+
+        kv.stop();
+    });
+
+    it('uses all between test', () => {
+        const kv = new pmemkv.KVEngine(ENGINE, CONFIG);
+        kv.put('A', '1');
+        kv.put('AB', '2');
+        kv.put('AC', '3');
+        kv.put('B', '4');
+        kv.put('BB', '5');
+        kv.put('BC', '6');
+        kv.put('记!', 'RR');
+
+        let x = '';
+        kv.all_between('A', 'B', (k) => x += `${k},`);
+        expect(x).to.equal('AB,AC,');
+
+        x = '';
+        kv.all_between('B', '\uFFFF', (k) => x += `${k},`);
+        expect(x).to.equal('BB,BC,记!,');
+
+        x = '';
+        kv.all_between('', '', (k) => x += `${k},`);
+        kv.all_between('A', 'A', (k) => x += `${k},`);
+        kv.all_between('B', 'A', (k) => x += `${k},`);
+        expect(x).to.equal('');
+
+        kv.stop();
+    });
+
+    it('uses count test', () => {
+        const kv = new pmemkv.KVEngine(ENGINE, CONFIG);
+        kv.put('A', '1');
+        kv.put('AB', '2');
+        kv.put('AC', '3');
+        kv.put('B', '4');
+        kv.put('BB', '5');
+        kv.put('BC', '6');
+        kv.put('BD', '7');
+        expect(kv.count).to.equal(7);
+
+        expect(kv.count_above('')).to.equal(7);
+        expect(kv.count_above('A')).to.equal(6);
+        expect(kv.count_above('B')).to.equal(3);
+        expect(kv.count_above('BC')).to.equal(1);
+        expect(kv.count_above('BD')).to.equal(0);
+        expect(kv.count_above('Z')).to.equal(0);
+
+        expect(kv.count_below('')).to.equal(0);
+        expect(kv.count_below('A')).to.equal(0);
+        expect(kv.count_below('B')).to.equal(3);
+        expect(kv.count_below('BD')).to.equal(6);
+        expect(kv.count_below('ZZZZZ')).to.equal(7);
+
+        expect(kv.count_between('', 'ZZZZ')).to.equal(7);
+        expect(kv.count_between('', 'A')).to.equal(0);
+        expect(kv.count_between('', 'B')).to.equal(3);
+        expect(kv.count_between('A', 'B')).to.equal(2);
+        expect(kv.count_between('B', 'ZZZZ')).to.equal(3);
+
+        expect(kv.count_between('', '')).to.equal(0);
+        expect(kv.count_between('A', 'A')).to.equal(0);
+        expect(kv.count_between('AC', 'A')).to.equal(0);
+        expect(kv.count_between('B', 'A')).to.equal(0);
+        expect(kv.count_between('BD', 'A')).to.equal(0);
+        expect(kv.count_between('ZZZ', 'B')).to.equal(0);
+
         kv.stop();
     });
 
     it('uses each test', () => {
         const kv = new pmemkv.KVEngine(ENGINE, CONFIG);
-        expect(kv.count).to.equal(0);
-        kv.put('RR', '记!');
-        expect(kv.count).to.equal(1);
-        kv.put('1', '2');
-        expect(kv.count).to.equal(2);
-        let result = '';
-        kv.each((k, v) => result += `<${k}>,<${v}>|`);
-        expect(result).to.equal('<1>,<2>|<RR>,<记!>|');
+        kv.put('1', 'one');
+        kv.put('2', 'two');
+        kv.put('记!', 'RR');
+
+        let x = '';
+        kv.each((k, v) => x += `<${k}>,<${v}>|`);
+        expect(x).to.equal('<1>,<one>|<2>,<two>|<记!>,<RR>|');
+
+        kv.stop();
+    });
+
+    it('uses each above test', () => {
+        const kv = new pmemkv.KVEngine(ENGINE, CONFIG);
+        kv.put('A', '1');
+        kv.put('AB', '2');
+        kv.put('AC', '3');
+        kv.put('B', '4');
+        kv.put('BB', '5');
+        kv.put('BC', '6');
+        kv.put('记!', 'RR');
+
+        let x = '';
+        kv.each_above('B', (k, v) => x += `${k},${v}|`);
+        expect(x).to.equal('BB,5|BC,6|记!,RR|');
+
+        x = '';
+        kv.each_above('', (k, v) => x += `${k},${v}|`);
+        expect(x).to.equal('A,1|AB,2|AC,3|B,4|BB,5|BC,6|记!,RR|');
+
+        kv.stop();
+    });
+
+    it('uses each below test', () => {
+        const kv = new pmemkv.KVEngine(ENGINE, CONFIG);
+        kv.put('A', '1');
+        kv.put('AB', '2');
+        kv.put('AC', '3');
+        kv.put('B', '4');
+        kv.put('BB', '5');
+        kv.put('BC', '6');
+        kv.put('记!', 'RR');
+
+        let x = '';
+        kv.each_below('AC', (k, v) => x += `${k},${v}|`);
+        expect(x).to.equal('A,1|AB,2|');
+
+        x = '';
+        kv.each_below('\uFFFF', (k, v) => x += `${k},${v}|`);
+        expect(x).to.equal('A,1|AB,2|AC,3|B,4|BB,5|BC,6|记!,RR|');
+
+        kv.stop();
+    });
+
+    it('uses each between test', () => {
+        const kv = new pmemkv.KVEngine(ENGINE, CONFIG);
+        kv.put('A', '1');
+        kv.put('AB', '2');
+        kv.put('AC', '3');
+        kv.put('B', '4');
+        kv.put('BB', '5');
+        kv.put('BC', '6');
+        kv.put('记!', 'RR');
+
+        let x = '';
+        kv.each_between('A', 'B', (k, v) => x += `${k},${v}|`);
+        expect(x).to.equal('AB,2|AC,3|');
+
+        x = '';
+        kv.each_between('B', '\uFFFF', (k, v) => x += `${k},${v}|`);
+        expect(x).to.equal('BB,5|BC,6|记!,RR|');
+
+        x = '';
+        kv.each_between('', '', (k, v) => x += `${k},${v}|`);
+        kv.each_between('A', 'A', (k, v) => x += `${k},${v}|`);
+        kv.each_between('B', 'A', (k, v) => x += `${k},${v}|`);
+        expect(x).to.equal('');
+
         kv.stop();
     });
 

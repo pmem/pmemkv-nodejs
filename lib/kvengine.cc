@@ -39,9 +39,18 @@ Napi::Object KVEngine::init(Napi::Env env, Napi::Object exports) {
 
     Napi::Function func = DefineClass(env, "KVEngine", {
             InstanceMethod("stop", &KVEngine::stop),
-            InstanceMethod("count", &KVEngine::count),
             InstanceMethod("all", &KVEngine::all),
+            InstanceMethod("all_above", &KVEngine::all_above),
+            InstanceMethod("all_below", &KVEngine::all_below),
+            InstanceMethod("all_between", &KVEngine::all_between),
+            InstanceMethod("count", &KVEngine::count),
+            InstanceMethod("count_above", &KVEngine::count_above),
+            InstanceMethod("count_below", &KVEngine::count_below),
+            InstanceMethod("count_between", &KVEngine::count_between),
             InstanceMethod("each", &KVEngine::each),
+            InstanceMethod("each_above", &KVEngine::each_above),
+            InstanceMethod("each_below", &KVEngine::each_below),
+            InstanceMethod("each_between", &KVEngine::each_between),
             InstanceMethod("exists", &KVEngine::exists),
             InstanceMethod("get", &KVEngine::get),
             InstanceMethod("put", &KVEngine::put),
@@ -83,11 +92,6 @@ Napi::Value KVEngine::stop(const Napi::CallbackInfo& info) {
     return Napi::Value();
 }
 
-Napi::Value KVEngine::count(const Napi::CallbackInfo& info) {
-    Napi::Env env = info.Env();
-    return Napi::Number::New(env, _kv->Count());
-}
-
 Napi::Value KVEngine::all(const Napi::CallbackInfo& info) {
     Napi::Env env = info.Env();
     Napi::Function cb = info[0].As<Napi::Function>();
@@ -97,10 +101,96 @@ Napi::Value KVEngine::all(const Napi::CallbackInfo& info) {
     return Napi::Value();
 }
 
+Napi::Value KVEngine::all_above(const Napi::CallbackInfo& info) {
+    Napi::Env env = info.Env();
+    string key = info[0].As<Napi::String>().Utf8Value();
+    Napi::Function cb = info[1].As<Napi::Function>();
+    this->_kv->AllAbove(key, [&](int keybytes, const char* key) {
+        cb.Call(env.Global(), {Napi::String::New(env, key)});
+    });
+    return Napi::Value();
+}
+
+Napi::Value KVEngine::all_below(const Napi::CallbackInfo& info) {
+    Napi::Env env = info.Env();
+    string key = info[0].As<Napi::String>().Utf8Value();
+    Napi::Function cb = info[1].As<Napi::Function>();
+    this->_kv->AllBelow(key, [&](int keybytes, const char* key) {
+        cb.Call(env.Global(), {Napi::String::New(env, key)});
+    });
+    return Napi::Value();
+}
+
+Napi::Value KVEngine::all_between(const Napi::CallbackInfo& info) {
+    Napi::Env env = info.Env();
+    string key1 = info[0].As<Napi::String>().Utf8Value();
+    string key2 = info[1].As<Napi::String>().Utf8Value();
+    Napi::Function cb = info[2].As<Napi::Function>();
+    this->_kv->AllBetween(key1, key2, [&](int keybytes, const char* key) {
+        cb.Call(env.Global(), {Napi::String::New(env, key)});
+    });
+    return Napi::Value();
+}
+
+Napi::Value KVEngine::count(const Napi::CallbackInfo& info) {
+    Napi::Env env = info.Env();
+    return Napi::Number::New(env, _kv->Count());
+}
+
+Napi::Value KVEngine::count_above(const Napi::CallbackInfo& info) {
+    Napi::Env env = info.Env();
+    string key = info[0].As<Napi::String>().Utf8Value();
+    return Napi::Number::New(env, _kv->CountAbove(key));
+}
+
+Napi::Value KVEngine::count_below(const Napi::CallbackInfo& info) {
+    Napi::Env env = info.Env();
+    string key = info[0].As<Napi::String>().Utf8Value();
+    return Napi::Number::New(env, _kv->CountBelow(key));
+}
+
+Napi::Value KVEngine::count_between(const Napi::CallbackInfo& info) {
+    Napi::Env env = info.Env();
+    string key1 = info[0].As<Napi::String>().Utf8Value();
+    string key2 = info[1].As<Napi::String>().Utf8Value();
+    return Napi::Number::New(env, _kv->CountBetween(key1, key2));
+}
+
 Napi::Value KVEngine::each(const Napi::CallbackInfo& info) {
     Napi::Env env = info.Env();
     Napi::Function cb = info[0].As<Napi::Function>();
     this->_kv->Each([&](int keybytes, const char* key, int valuebytes, const char* value) {
+        cb.Call(env.Global(), {Napi::String::New(env, key), Napi::String::New(env, value)});
+    });
+    return Napi::Value();
+}
+
+Napi::Value KVEngine::each_above(const Napi::CallbackInfo& info) {
+    Napi::Env env = info.Env();
+    string key = info[0].As<Napi::String>().Utf8Value();
+    Napi::Function cb = info[1].As<Napi::Function>();
+    this->_kv->EachAbove(key, [&](int keybytes, const char* key, int valuebytes, const char* value) {
+        cb.Call(env.Global(), {Napi::String::New(env, key), Napi::String::New(env, value)});
+    });
+    return Napi::Value();
+}
+
+Napi::Value KVEngine::each_below(const Napi::CallbackInfo& info) {
+    Napi::Env env = info.Env();
+    string key = info[0].As<Napi::String>().Utf8Value();
+    Napi::Function cb = info[1].As<Napi::Function>();
+    this->_kv->EachBelow(key, [&](int keybytes, const char* key, int valuebytes, const char* value) {
+        cb.Call(env.Global(), {Napi::String::New(env, key), Napi::String::New(env, value)});
+    });
+    return Napi::Value();
+}
+
+Napi::Value KVEngine::each_between(const Napi::CallbackInfo& info) {
+    Napi::Env env = info.Env();
+    string key1 = info[0].As<Napi::String>().Utf8Value();
+    string key2 = info[1].As<Napi::String>().Utf8Value();
+    Napi::Function cb = info[2].As<Napi::Function>();
+    this->_kv->EachBetween(key1, key2, [&](int keybytes, const char* key, int valuebytes, const char* value) {
         cb.Call(env.Global(), {Napi::String::New(env, key), Napi::String::New(env, value)});
     });
     return Napi::Value();

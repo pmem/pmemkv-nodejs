@@ -46,9 +46,18 @@ class KVEngine : public Napi::ObjectWrap<KVEngine> {
     static Napi::FunctionReference constructor;
 
     Napi::Value stop(const Napi::CallbackInfo& info);
-    Napi::Value count(const Napi::CallbackInfo& info);
     Napi::Value all(const Napi::CallbackInfo& info);
+    Napi::Value all_above(const Napi::CallbackInfo& info);
+    Napi::Value all_below(const Napi::CallbackInfo& info);
+    Napi::Value all_between(const Napi::CallbackInfo& info);
+    Napi::Value count(const Napi::CallbackInfo& info);
+    Napi::Value count_above(const Napi::CallbackInfo& info);
+    Napi::Value count_below(const Napi::CallbackInfo& info);
+    Napi::Value count_between(const Napi::CallbackInfo& info);
     Napi::Value each(const Napi::CallbackInfo& info);
+    Napi::Value each_above(const Napi::CallbackInfo& info);
+    Napi::Value each_below(const Napi::CallbackInfo& info);
+    Napi::Value each_between(const Napi::CallbackInfo& info);
     Napi::Value exists(const Napi::CallbackInfo& info);
     Napi::Value get(const Napi::CallbackInfo& info);
     Napi::Value put(const Napi::CallbackInfo& info);
