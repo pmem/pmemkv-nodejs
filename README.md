@@ -11,7 +11,7 @@ are logged as GitHub issues.*
 * Node.js 6.10 or higher
 * [PMDK](https://github.com/pmem/pmdk) - native persistent memory libraries
 * [pmemkv](https://github.com/pmem/pmemkv) - native key/value library
-* [node-addon-api](https://github.com/nodejs/node-addon-api) - for native library integration
+* [node-addon-api](https://github.com/nodejs/node-addon-api), [node-bindings](https://github.com/TooTallNate/node-bindings), [node-gyp](https://github.com/nodejs/node-gyp) - for native library integration
 * Used only for testing:
   * [chai](https://github.com/chaijs/chai) - test assertion library
   * [chai-string](https://github.com/onechiporenko/chai-string) - string assertion library
@@ -41,7 +41,7 @@ function assert(condition) {
 }
 
 console.log('Starting engine');
-const kv = new KVEngine('kvtree3', '{"path":"/dev/shm/pmemkv"}');
+const kv = new KVEngine('vmap', '{"path":"/dev/shm/"}');
 
 console.log('Putting new key');
 kv.put('key1', 'value1');
