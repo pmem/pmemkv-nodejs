@@ -95,40 +95,92 @@ Napi::Value KVEngine::stop(const Napi::CallbackInfo& info) {
 Napi::Value KVEngine::all(const Napi::CallbackInfo& info) {
     Napi::Env env = info.Env();
     Napi::Function cb = info[0].As<Napi::Function>();
-    this->_kv->All([&](int keybytes, const char* key) {
-        cb.Call(env.Global(), {Napi::String::New(env, key, keybytes)});
-    });
+    bool as_buffer = info[1].As<Napi::Boolean>();
+    if (as_buffer){
+        this->_kv->All([&](int keybytes, const char* key) {
+            cb.Call(env.Global(), {Napi::Buffer<char>::Copy(env, key, keybytes)});
+        });
+    }
+    else {
+        this->_kv->All([&](int keybytes, const char* key) {
+            cb.Call(env.Global(), {Napi::String::New(env, key, keybytes)});
+        });
+    }
     return Napi::Value();
 }
 
 Napi::Value KVEngine::all_above(const Napi::CallbackInfo& info) {
     Napi::Env env = info.Env();
-    string key = info[0].As<Napi::String>().Utf8Value();
+    string key;
     Napi::Function cb = info[1].As<Napi::Function>();
-    this->_kv->AllAbove(key, [&](int keybytes, const char* key) {
-        cb.Call(env.Global(), {Napi::String::New(env, key, keybytes)});
-    });
+    if (info[0].IsBuffer()){
+        Napi::Buffer<char> buffer = info[0].As<Napi::Buffer<char>>();
+        key = string(buffer.Data(), buffer.Length());
+        this->_kv->AllAbove(key, [&](int keybytes, const char* key) {
+            cb.Call(env.Global(), {Napi::Buffer<char>::Copy(env, key, keybytes)});
+        });
+    }
+    else if (info[0].IsString()){
+        key = info[0].As<Napi::String>().Utf8Value();
+        this->_kv->AllAbove(key, [&](int keybytes, const char* key) {
+            cb.Call(env.Global(), {Napi::String::New(env, key, keybytes)});
+        });
+    }
+    else {
+        Napi::Error::New(env, "A Buffer or string is expected").ThrowAsJavaScriptException();
+        return Napi::Value();
+    }
     return Napi::Value();
 }
 
 Napi::Value KVEngine::all_below(const Napi::CallbackInfo& info) {
     Napi::Env env = info.Env();
-    string key = info[0].As<Napi::String>().Utf8Value();
+    string key;
     Napi::Function cb = info[1].As<Napi::Function>();
-    this->_kv->AllBelow(key, [&](int keybytes, const char* key) {
-        cb.Call(env.Global(), {Napi::String::New(env, key, keybytes)});
-    });
+    if (info[0].IsBuffer()){
+        Napi::Buffer<char> buffer = info[0].As<Napi::Buffer<char>>();
+        key = string(buffer.Data(), buffer.Length());
+        this->_kv->AllBelow(key, [&](int keybytes, const char* key) {
+            cb.Call(env.Global(), {Napi::Buffer<char>::Copy(env, key, keybytes)});
+        });
+    }
+    else if (info[0].IsString()){
+        key = info[0].As<Napi::String>().Utf8Value();
+        this->_kv->AllBelow(key, [&](int keybytes, const char* key) {
+            cb.Call(env.Global(), {Napi::String::New(env, key, keybytes)});
+        });
+    }
+    else {
+        Napi::Error::New(env, "A Buffer or string is expected").ThrowAsJavaScriptException();
+        return Napi::Value();
+    }
     return Napi::Value();
 }
 
 Napi::Value KVEngine::all_between(const Napi::CallbackInfo& info) {
     Napi::Env env = info.Env();
-    string key1 = info[0].As<Napi::String>().Utf8Value();
-    string key2 = info[1].As<Napi::String>().Utf8Value();
+    string key1, key2;
     Napi::Function cb = info[2].As<Napi::Function>();
-    this->_kv->AllBetween(key1, key2, [&](int keybytes, const char* key) {
-        cb.Call(env.Global(), {Napi::String::New(env, key, keybytes)});
-    });
+    if (info[0].IsBuffer()){
+        Napi::Buffer<char> buffer1 = info[0].As<Napi::Buffer<char>>();
+        Napi::Buffer<char> buffer2 = info[1].As<Napi::Buffer<char>>();
+        key1 = string(buffer1.Data(), buffer1.Length());
+        key2 = string(buffer2.Data(), buffer2.Length());
+        this->_kv->AllBetween(key1, key2, [&](int keybytes, const char* key) {
+            cb.Call(env.Global(), {Napi::Buffer<char>::Copy(env, key, keybytes)});
+        });
+    }
+    else if (info[0].IsString()){
+        key1 = info[0].As<Napi::String>().Utf8Value();
+        key2 = info[1].As<Napi::String>().Utf8Value();
+        this->_kv->AllBetween(key1, key2, [&](int keybytes, const char* key) {
+            cb.Call(env.Global(), {Napi::String::New(env, key, keybytes)});
+        });
+    }
+    else {
+        Napi::Error::New(env, "A Buffer or string is expected").ThrowAsJavaScriptException();
+        return Napi::Value();
+    }
     return Napi::Value();
 }
 
@@ -139,75 +191,162 @@ Napi::Value KVEngine::count(const Napi::CallbackInfo& info) {
 
 Napi::Value KVEngine::count_above(const Napi::CallbackInfo& info) {
     Napi::Env env = info.Env();
-    string key = info[0].As<Napi::String>().Utf8Value();
+    string key;
+    if (info[0].IsBuffer()){
+        Napi::Buffer<char> buffer = info[0].As<Napi::Buffer<char>>();
+        key = string(buffer.Data(), buffer.Length());
+    }
+    else if (info[0].IsString()){
+        key = info[0].As<Napi::String>().Utf8Value();
+    }
+    else {
+        Napi::Error::New(env, "A Buffer or string is expected").ThrowAsJavaScriptException();
+        return Napi::Value();
+    }
     return Napi::Number::New(env, _kv->CountAbove(key));
 }
 
 Napi::Value KVEngine::count_below(const Napi::CallbackInfo& info) {
     Napi::Env env = info.Env();
-    string key = info[0].As<Napi::String>().Utf8Value();
+    string key;
+    if (info[0].IsBuffer()){
+        Napi::Buffer<char> buffer = info[0].As<Napi::Buffer<char>>();
+        key = string(buffer.Data(), buffer.Length());
+    }
+    else if (info[0].IsString()){
+        key = info[0].As<Napi::String>().Utf8Value();
+    }
+    else {
+        Napi::Error::New(env, "A Buffer or string is expected").ThrowAsJavaScriptException();
+        return Napi::Value();
+    }
     return Napi::Number::New(env, _kv->CountBelow(key));
 }
 
 Napi::Value KVEngine::count_between(const Napi::CallbackInfo& info) {
     Napi::Env env = info.Env();
-    string key1 = info[0].As<Napi::String>().Utf8Value();
-    string key2 = info[1].As<Napi::String>().Utf8Value();
+    string key1, key2;
+    if (info[0].IsBuffer()){
+        Napi::Buffer<char> buffer1 = info[0].As<Napi::Buffer<char>>();
+        Napi::Buffer<char> buffer2 = info[1].As<Napi::Buffer<char>>();
+        key1 = string(buffer1.Data(), buffer1.Length());
+        key2 = string(buffer2.Data(), buffer2.Length());
+    }
+    else if(info[0].IsString()){
+        key1 = info[0].As<Napi::String>().Utf8Value();
+        key2 = info[1].As<Napi::String>().Utf8Value();
+    }
+    else {
+        Napi::Error::New(env, "A Buffer or string is expected").ThrowAsJavaScriptException();
+        return Napi::Value();
+    }
     return Napi::Number::New(env, _kv->CountBetween(key1, key2));
 }
 
 Napi::Value KVEngine::each(const Napi::CallbackInfo& info) {
     Napi::Env env = info.Env();
     Napi::Function cb = info[0].As<Napi::Function>();
-    this->_kv->Each([&](int keybytes, const char* key, int valuebytes, const char* value) {
-        cb.Call(env.Global(), {Napi::String::New(env, key, keybytes), Napi::String::New(env, value, valuebytes)});
-    });
+    bool as_buffer = info[1].As<Napi::Boolean>();
+    if (as_buffer){
+        this->_kv->Each([&](int keybytes, const char* key, int valuebytes, const char* value) {
+            cb.Call(env.Global(), {Napi::Buffer<char>::Copy(env, key, keybytes), Napi::Buffer<char>::Copy(env, value, valuebytes)});
+        });
+    }
+    else{
+        this->_kv->Each([&](int keybytes, const char* key, int valuebytes, const char* value) {
+            cb.Call(env.Global(), {Napi::String::New(env, key, keybytes), Napi::String::New(env, value, valuebytes)});
+        });
+    }
     return Napi::Value();
 }
 
 Napi::Value KVEngine::each_above(const Napi::CallbackInfo& info) {
     Napi::Env env = info.Env();
-    string key = info[0].As<Napi::String>().Utf8Value();
+    string key;
     Napi::Function cb = info[1].As<Napi::Function>();
-    this->_kv->EachAbove(key, [&](int keybytes, const char* key, int valuebytes, const char* value) {
-        cb.Call(env.Global(), {Napi::String::New(env, key, keybytes), Napi::String::New(env, value, valuebytes)});
-    });
+    if (info[0].IsBuffer()){
+        Napi::Buffer<char> buffer = info[0].As<Napi::Buffer<char>>();
+        key = string(buffer.Data(), buffer.Length());
+        this->_kv->EachAbove(key, [&](int keybytes, const char* key, int valuebytes, const char* value) {
+            cb.Call(env.Global(), {Napi::Buffer<char>::Copy(env, key, keybytes), Napi::Buffer<char>::Copy(env, value, valuebytes)});
+        });
+    }
+    else if (info[0].IsString()){
+        key = info[0].As<Napi::String>().Utf8Value();
+        this->_kv->EachAbove(key, [&](int keybytes, const char* key, int valuebytes, const char* value) {
+            cb.Call(env.Global(), {Napi::String::New(env, key, keybytes), Napi::String::New(env, value, valuebytes)});
+        });
+    }
+    else {
+        Napi::Error::New(env, "A Buffer or string is expected").ThrowAsJavaScriptException();
+        return Napi::Value();
+    }
     return Napi::Value();
 }
 
 Napi::Value KVEngine::each_below(const Napi::CallbackInfo& info) {
     Napi::Env env = info.Env();
-    string key = info[0].As<Napi::String>().Utf8Value();
+    string key;
     Napi::Function cb = info[1].As<Napi::Function>();
-    this->_kv->EachBelow(key, [&](int keybytes, const char* key, int valuebytes, const char* value) {
-        cb.Call(env.Global(), {Napi::String::New(env, key, keybytes), Napi::String::New(env, value, valuebytes)});
-    });
+    if (info[0].IsBuffer()){
+        Napi::Buffer<char> buffer = info[0].As<Napi::Buffer<char>>();
+        key = string(buffer.Data(), buffer.Length());
+        this->_kv->EachBelow(key, [&](int keybytes, const char* key, int valuebytes, const char* value) {
+            cb.Call(env.Global(), {Napi::Buffer<char>::Copy(env, key, keybytes), Napi::Buffer<char>::Copy(env, value, valuebytes)});
+        });
+    }
+    else if (info[0].IsString()){
+        key = info[0].As<Napi::String>().Utf8Value();
+        this->_kv->EachBelow(key, [&](int keybytes, const char* key, int valuebytes, const char* value) {
+            cb.Call(env.Global(), {Napi::String::New(env, key, keybytes), Napi::String::New(env, value, valuebytes)});
+        });
+    }
+    else {
+        Napi::Error::New(env, "A Buffer or string is expected").ThrowAsJavaScriptException();
+        return Napi::Value();
+    }
     return Napi::Value();
 }
 
 Napi::Value KVEngine::each_between(const Napi::CallbackInfo& info) {
     Napi::Env env = info.Env();
-    string key1 = info[0].As<Napi::String>().Utf8Value();
-    string key2 = info[1].As<Napi::String>().Utf8Value();
+    string key1, key2;
     Napi::Function cb = info[2].As<Napi::Function>();
-    this->_kv->EachBetween(key1, key2, [&](int keybytes, const char* key, int valuebytes, const char* value) {
-        cb.Call(env.Global(), {Napi::String::New(env, key, keybytes), Napi::String::New(env, value, valuebytes)});
-    });
+    if (info[0].IsBuffer()){
+        Napi::Buffer<char> buffer1 = info[0].As<Napi::Buffer<char>>();
+        Napi::Buffer<char> buffer2 = info[1].As<Napi::Buffer<char>>();
+        key1 = string(buffer1.Data(), buffer1.Length());
+        key2 = string(buffer2.Data(), buffer2.Length());
+        this->_kv->EachBetween(key1, key2, [&](int keybytes, const char* key, int valuebytes, const char* value) {
+            cb.Call(env.Global(), {Napi::Buffer<char>::Copy(env, key, keybytes), Napi::Buffer<char>::Copy(env, value, valuebytes)});
+        });
+    }
+    else if (info[0].IsString()){
+        key1 = info[0].As<Napi::String>().Utf8Value();
+        key2 = info[1].As<Napi::String>().Utf8Value();
+        this->_kv->EachBetween(key1, key2, [&](int keybytes, const char* key, int valuebytes, const char* value) {
+            cb.Call(env.Global(), {Napi::String::New(env, key, keybytes), Napi::String::New(env, value, valuebytes)});
+        });
+    }
+    else {
+        Napi::Error::New(env, "A Buffer or string is expected").ThrowAsJavaScriptException();
+        return Napi::Value();
+    }
     return Napi::Value();
 }
 
 Napi::Value KVEngine::exists(const Napi::CallbackInfo& info) {
     Napi::Env env = info.Env();
     string key;
-    if (info[0].IsString()){
-        key = info[0].As<Napi::String>().Utf8Value();
-    }
-    else if (info[0].IsBuffer()){
+    if (info[0].IsBuffer()){
         Napi::Buffer<char> buffer = info[0].As<Napi::Buffer<char>>();
         key = string(buffer.Data(), buffer.Length());
     }
+    else if (info[0].IsString()){
+        key = info[0].As<Napi::String>().Utf8Value();
+    }
     else {
-        Napi::Error::New(env, "A string or Buffer is expected").ThrowAsJavaScriptException();
+        Napi::Error::New(env, "A Buffer or string is expected").ThrowAsJavaScriptException();
         return Napi::Value();
     }
     return Napi::Boolean::New(env, (_kv->Exists(key) == OK));
@@ -224,16 +363,7 @@ Napi::Value KVEngine::get(const Napi::CallbackInfo& info) {
     string key;
     Napi::Value value;
     GetCallbackContext cxt = {NOT_FOUND, env, value};
-    if (info[0].IsString()){
-        key = info[0].As<Napi::String>().Utf8Value();
-        auto cb = [](void* context, int valuebytes, const char* value){
-            const auto c = ((GetCallbackContext*)context);
-            c->status = OK;
-            c->value = Napi::String::New(c->env, value, valuebytes);
-        };
-        this->_kv->Get(&cxt, key, cb);
-    }
-    else if (info[0].IsBuffer()){
+    if (info[0].IsBuffer()){
         Napi::Buffer<char> buffer = info[0].As<Napi::Buffer<char>>();
         key = string(buffer.Data(), buffer.Length());
         auto cb = [](void* context, int valuebytes, const char* value){
@@ -243,8 +373,17 @@ Napi::Value KVEngine::get(const Napi::CallbackInfo& info) {
         };
         this->_kv->Get(&cxt, key, cb);
     }
+    else if (info[0].IsString()){
+        key = info[0].As<Napi::String>().Utf8Value();
+        auto cb = [](void* context, int valuebytes, const char* value){
+            const auto c = ((GetCallbackContext*)context);
+            c->status = OK;
+            c->value = Napi::String::New(c->env, value, valuebytes);
+        };
+        this->_kv->Get(&cxt, key, cb);
+    }
     else {
-        Napi::Error::New(env, "A string or Buffer is expected").ThrowAsJavaScriptException();
+        Napi::Error::New(env, "A Buffer or string is expected").ThrowAsJavaScriptException();
         return Napi::Value();
     }
     if (cxt.status == OK){
@@ -263,27 +402,28 @@ Napi::Value KVEngine::put(const Napi::CallbackInfo& info) {
     Napi::Env env = info.Env();
     string key, value;
     // get key
-    if (info[0].IsString()){
-        key = info[0].As<Napi::String>().Utf8Value();
-    }
-    else if (info[0].IsBuffer()){
+    if (info[0].IsBuffer()){
         Napi::Buffer<char> buffer = info[0].As<Napi::Buffer<char>>();
         key = string(buffer.Data(), buffer.Length());
     }
+    else if (info[0].IsString()){
+        key = info[0].As<Napi::String>().Utf8Value();
+    }
+    
     else {
-        Napi::Error::New(env, "A string or Buffer is expected").ThrowAsJavaScriptException();
+        Napi::Error::New(env, "A Buffer or string is expected").ThrowAsJavaScriptException();
         return Napi::Value();
     }
     // get value
-    if (info[1].IsString()){
-        value = info[1].As<Napi::String>().Utf8Value();
-    }
-    else if (info[1].IsBuffer()){
+    if (info[1].IsBuffer()){
         Napi::Buffer<char> buffer = info[1].As<Napi::Buffer<char>>();
         value = string(buffer.Data(), buffer.Length());
     }
+    else if (info[1].IsString()){
+        value = info[1].As<Napi::String>().Utf8Value();
+    }
     else {
-        Napi::Error::New(env, "A string or Buffer is expected").ThrowAsJavaScriptException();
+        Napi::Error::New(env, "A Buffer or string is expected").ThrowAsJavaScriptException();
         return Napi::Value();
     }
     KVStatus status = this->_kv->Put(key, value);
@@ -294,15 +434,15 @@ Napi::Value KVEngine::put(const Napi::CallbackInfo& info) {
 Napi::Value KVEngine::remove(const Napi::CallbackInfo& info) {
     Napi::Env env = info.Env();
     string key;
-    if (info[0].IsString()){
-        key = info[0].As<Napi::String>().Utf8Value();
-    }
-    else if (info[0].IsBuffer()){
+    if (info[0].IsBuffer()){
         Napi::Buffer<char> buffer = info[0].As<Napi::Buffer<char>>();
         key = string(buffer.Data(), buffer.Length());
     }
+    else if (info[0].IsString()){
+        key = info[0].As<Napi::String>().Utf8Value();
+    }
     else {
-        Napi::Error::New(env, "A string or Buffer is expected").ThrowAsJavaScriptException();
+        Napi::Error::New(env, "A Buffer or string is expected").ThrowAsJavaScriptException();
         return Napi::Value();
     }
     KVStatus status = this->_kv->Remove(key);
