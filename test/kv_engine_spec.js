@@ -30,7 +30,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-const ENGINE = 'vmap';
+const ENGINE = 'vsmap';
 const CONFIG = `{"path":"/dev/shm"}`;
 
 const chai = require('chai');
