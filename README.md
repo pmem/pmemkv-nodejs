@@ -27,6 +27,14 @@ Add npm module to your project:
 npm install pmem/pmemkv-nodejs --save
 ```
 
+## Testing
+
+This library includes a set of automated tests that exercise all functionality.
+
+```
+npm test
+```
+
 ## Example
 
 We are using `/dev/shm` to
