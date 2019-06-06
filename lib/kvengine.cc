@@ -31,6 +31,7 @@
  */
 
 #include "kvengine.h"
+#include <string>
 
 Napi::FunctionReference KVEngine::constructor;
 
@@ -68,8 +69,8 @@ KVEngine::KVEngine(const Napi::CallbackInfo& info) : Napi::ObjectWrap<KVEngine>(
     Napi::HandleScope scope(env);
     int length = info.Length();
     if (length != 3) Napi::TypeError::New(env, "invalid arguments").ThrowAsJavaScriptException();
-    string engine = info[0].As<Napi::String>().Utf8Value();
-    string config = info[1].As<Napi::String>().Utf8Value();
+    std::string engine = info[0].As<Napi::String>().Utf8Value();
+    std::string config = info[1].As<Napi::String>().Utf8Value();
     Napi::Function cb = info[2].As<Napi::Function>();
     std::function<KVStartFailureCallback> localf = [&](void* context, const char* engine, const char* config,
                                                        const char* msg) {
@@ -103,7 +104,7 @@ Napi::Value KVEngine::all(const Napi::CallbackInfo& info) {
 
 Napi::Value KVEngine::all_above(const Napi::CallbackInfo& info) {
     Napi::Env env = info.Env();
-    string key = info[0].As<Napi::String>().Utf8Value();
+    std::string key = info[0].As<Napi::String>().Utf8Value();
     Napi::Function cb = info[1].As<Napi::Function>();
     this->_kv->AllAbove(key, [&](int keybytes, const char* key) {
         cb.Call(env.Global(), {Napi::String::New(env, key)});
@@ -113,7 +114,7 @@ Napi::Value KVEngine::all_above(const Napi::CallbackInfo& info) {
 
 Napi::Value KVEngine::all_below(const Napi::CallbackInfo& info) {
     Napi::Env env = info.Env();
-    string key = info[0].As<Napi::String>().Utf8Value();
+    std::string key = info[0].As<Napi::String>().Utf8Value();
     Napi::Function cb = info[1].As<Napi::Function>();
     this->_kv->AllBelow(key, [&](int keybytes, const char* key) {
         cb.Call(env.Global(), {Napi::String::New(env, key)});
@@ -123,8 +124,8 @@ Napi::Value KVEngine::all_below(const Napi::CallbackInfo& info) {
 
 Napi::Value KVEngine::all_between(const Napi::CallbackInfo& info) {
     Napi::Env env = info.Env();
-    string key1 = info[0].As<Napi::String>().Utf8Value();
-    string key2 = info[1].As<Napi::String>().Utf8Value();
+    std::string key1 = info[0].As<Napi::String>().Utf8Value();
+    std::string key2 = info[1].As<Napi::String>().Utf8Value();
     Napi::Function cb = info[2].As<Napi::Function>();
     this->_kv->AllBetween(key1, key2, [&](int keybytes, const char* key) {
         cb.Call(env.Global(), {Napi::String::New(env, key)});
@@ -139,20 +140,20 @@ Napi::Value KVEngine::count(const Napi::CallbackInfo& info) {
 
 Napi::Value KVEngine::count_above(const Napi::CallbackInfo& info) {
     Napi::Env env = info.Env();
-    string key = info[0].As<Napi::String>().Utf8Value();
+    std::string key = info[0].As<Napi::String>().Utf8Value();
     return Napi::Number::New(env, _kv->CountAbove(key));
 }
 
 Napi::Value KVEngine::count_below(const Napi::CallbackInfo& info) {
     Napi::Env env = info.Env();
-    string key = info[0].As<Napi::String>().Utf8Value();
+    std::string key = info[0].As<Napi::String>().Utf8Value();
     return Napi::Number::New(env, _kv->CountBelow(key));
 }
 
 Napi::Value KVEngine::count_between(const Napi::CallbackInfo& info) {
     Napi::Env env = info.Env();
-    string key1 = info[0].As<Napi::String>().Utf8Value();
-    string key2 = info[1].As<Napi::String>().Utf8Value();
+    std::string key1 = info[0].As<Napi::String>().Utf8Value();
+    std::string key2 = info[1].As<Napi::String>().Utf8Value();
     return Napi::Number::New(env, _kv->CountBetween(key1, key2));
 }
 
@@ -167,7 +168,7 @@ Napi::Value KVEngine::each(const Napi::CallbackInfo& info) {
 
 Napi::Value KVEngine::each_above(const Napi::CallbackInfo& info) {
     Napi::Env env = info.Env();
-    string key = info[0].As<Napi::String>().Utf8Value();
+    std::string key = info[0].As<Napi::String>().Utf8Value();
     Napi::Function cb = info[1].As<Napi::Function>();
     this->_kv->EachAbove(key, [&](int keybytes, const char* key, int valuebytes, const char* value) {
         cb.Call(env.Global(), {Napi::String::New(env, key), Napi::String::New(env, value)});
@@ -177,7 +178,7 @@ Napi::Value KVEngine::each_above(const Napi::CallbackInfo& info) {
 
 Napi::Value KVEngine::each_below(const Napi::CallbackInfo& info) {
     Napi::Env env = info.Env();
-    string key = info[0].As<Napi::String>().Utf8Value();
+    std::string key = info[0].As<Napi::String>().Utf8Value();
     Napi::Function cb = info[1].As<Napi::Function>();
     this->_kv->EachBelow(key, [&](int keybytes, const char* key, int valuebytes, const char* value) {
         cb.Call(env.Global(), {Napi::String::New(env, key), Napi::String::New(env, value)});
@@ -187,8 +188,8 @@ Napi::Value KVEngine::each_below(const Napi::CallbackInfo& info) {
 
 Napi::Value KVEngine::each_between(const Napi::CallbackInfo& info) {
     Napi::Env env = info.Env();
-    string key1 = info[0].As<Napi::String>().Utf8Value();
-    string key2 = info[1].As<Napi::String>().Utf8Value();
+    std::string key1 = info[0].As<Napi::String>().Utf8Value();
+    std::string key2 = info[1].As<Napi::String>().Utf8Value();
     Napi::Function cb = info[2].As<Napi::Function>();
     this->_kv->EachBetween(key1, key2, [&](int keybytes, const char* key, int valuebytes, const char* value) {
         cb.Call(env.Global(), {Napi::String::New(env, key), Napi::String::New(env, value)});
@@ -198,14 +199,14 @@ Napi::Value KVEngine::each_between(const Napi::CallbackInfo& info) {
 
 Napi::Value KVEngine::exists(const Napi::CallbackInfo& info) {
     Napi::Env env = info.Env();
-    string key = info[0].As<Napi::String>().Utf8Value();
+    std::string key = info[0].As<Napi::String>().Utf8Value();
     return Napi::Boolean::New(env, (_kv->Exists(key) == OK));
 }
 
 Napi::Value KVEngine::get(const Napi::CallbackInfo& info) {
     Napi::Env env = info.Env();
-    string key = info[0].As<Napi::String>().Utf8Value();
-    string value;
+    std::string key = info[0].As<Napi::String>().Utf8Value();
+    std::string value;
     KVStatus status = this->_kv->Get(key, &value);
     if (status == OK)
         return Napi::String::New(env, value);
@@ -219,8 +220,8 @@ Napi::Value KVEngine::get(const Napi::CallbackInfo& info) {
 
 Napi::Value KVEngine::put(const Napi::CallbackInfo& info) {
     Napi::Env env = info.Env();
-    string key = info[0].As<Napi::String>().Utf8Value();
-    string value = info[1].As<Napi::String>().Utf8Value();
+    std::string key = info[0].As<Napi::String>().Utf8Value();
+    std::string value = info[1].As<Napi::String>().Utf8Value();
     KVStatus status = this->_kv->Put(key, value);
     if (status == FAILED) Napi::Error::New(env, "Unable to put key").ThrowAsJavaScriptException();
     return Napi::Value();
@@ -228,7 +229,7 @@ Napi::Value KVEngine::put(const Napi::CallbackInfo& info) {
 
 Napi::Value KVEngine::remove(const Napi::CallbackInfo& info) {
     Napi::Env env = info.Env();
-    string key = info[0].As<Napi::String>().Utf8Value();
+    std::string key = info[0].As<Napi::String>().Utf8Value();
     KVStatus status = this->_kv->Remove(key);
     if (status == FAILED) Napi::Error::New(env, "Unable to remove key").ThrowAsJavaScriptException();
     return Napi::Boolean::New(env, (status == OK));
