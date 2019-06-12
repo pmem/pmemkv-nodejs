@@ -21,10 +21,17 @@ are logged as GitHub issues.*
 
 Start by installing [pmemkv](https://github.com/pmem/pmemkv/blob/master/INSTALLING.md) on your system.
 
-Add npm module to your project:
+Clone the pmemkv-nodejs tree:
 
 ```
-npm install pmem/pmemkv-nodejs --save
+git clone https://github.com/pmem/pmemkv-nodejs.git
+cd pmemkv-nodejs
+```
+
+Add npm modules to your project (install the dependencies listed in package.json in the local node_modules folder):
+
+```
+npm install
 ```
 
 ## Testing
@@ -32,7 +39,7 @@ npm install pmem/pmemkv-nodejs --save
 This library includes a set of automated tests that exercise all functionality.
 
 ```
-npm test
+LD_LIBRARY_PATH=path_to_your_libs npm test
 ```
 
 ## Example
