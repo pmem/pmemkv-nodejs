@@ -31,435 +31,365 @@
  */
 
 const ENGINE = 'vsmap';
-const CONFIG = `{"path":"/dev/shm"}`;
+const CONFIG = `{"path":"/dev/shm", "size":1073741824}`;
 
 const chai = require('chai');
 chai.use(require('chai-string'));
 const expect = chai.expect;
 const pmemkv = require('../lib/all');
 
-describe('KVEngine', () => {
+describe('db', () => {
 
     it('uses module to publish types', () => {
-        expect(pmemkv.KVEngine).to.exist;
-        expect(pmemkv['KVEngine']).to.exist;
+        expect(pmemkv.db).to.exist;
+        expect(pmemkv['db']).to.exist;
         expect(pmemkv['madeThisUP']).not.to.exist;
     });
 
     it('uses blackhole engine', () => {
-        const kv = new pmemkv.KVEngine('blackhole', CONFIG);
-        expect(kv.count).to.equal(0);
-        expect(kv.exists('key1')).to.be.false;
-        expect(kv.get('key1')).not.to.exist;
-        kv.put('key1', 'value1');
-        expect(kv.count).to.equal(0);
-        expect(kv.exists('key1')).to.be.false;
-        expect(kv.get('key1')).not.to.exist;
-        expect(kv.remove('key1')).to.be.true;
-        expect(kv.exists('key1')).to.be.false;
-        expect(kv.get('key1')).not.to.exist;
-        kv.stop();
+        const db = new pmemkv.db('blackhole', CONFIG);
+        expect(db.count_all).to.equal(0);
+        expect(db.exists('key1')).to.be.false;
+        expect(db.get('key1')).not.to.exist;
+        db.put('key1', 'value1');
+        expect(db.count_all).to.equal(0);
+        expect(db.exists('key1')).to.be.false;
+        expect(db.get('key1')).not.to.exist;
+        expect(db.remove('key1')).to.be.true;
+        expect(db.exists('key1')).to.be.false;
+        expect(db.get('key1')).not.to.exist;
+        db.stop();
     });
 
     it('starts engine', () => {
-        const kv = new pmemkv.KVEngine(ENGINE, CONFIG);
-        kv['_kv'] = undefined;
-        expect(kv['_kv']).to.exist;
-        expect(kv.stopped).to.be.false;
-        kv.stop();
-        kv['_stopped'] = false;
-        expect(kv['_stopped']).to.be.true;
-        expect(kv.stopped).to.be.true;
+        const db = new pmemkv.db(ENGINE, CONFIG);
+        db['_db'] = undefined;
+        expect(db['_db']).to.exist;
+        expect(db.stopped).to.be.false;
+        db.stop();
+        db['_stopped'] = false;
+        expect(db['_stopped']).to.be.true;
+        expect(db.stopped).to.be.true;
     });
 
     it('stops engine multiple times', () => {
-        const kv = new pmemkv.KVEngine(ENGINE, CONFIG);
-        expect(kv.stopped).to.be.false;
-        kv.stop();
-        expect(kv.stopped).to.be.true;
-        kv.stop();
-        expect(kv.stopped).to.be.true;
-        kv.stop();
-        expect(kv.stopped).to.be.true;
+        const db = new pmemkv.db(ENGINE, CONFIG);
+        expect(db.stopped).to.be.false;
+        db.stop();
+        expect(db.stopped).to.be.true;
+        db.stop();
+        expect(db.stopped).to.be.true;
+        db.stop();
+        expect(db.stopped).to.be.true;
     });
 
     it('gets missing key', () => {
-        const kv = new pmemkv.KVEngine(ENGINE, CONFIG);
-        expect(kv.exists('key1')).to.be.false;
-        expect(kv.get('key1')).not.to.exist;
-        kv.stop();
+        const db = new pmemkv.db(ENGINE, CONFIG);
+        expect(db.exists('key1')).to.be.false;
+        expect(db.get('key1')).not.to.exist;
+        db.stop();
     });
 
     it('puts basic value', () => {
-        const kv = new pmemkv.KVEngine(ENGINE, CONFIG);
-        expect(kv.exists('key1')).to.be.false;
-        kv.put('key1', 'value1');
-        expect(kv.exists('key1')).to.be.true;
-        expect(kv.get('key1')).to.equal('value1');
-        kv.stop();
+        const db = new pmemkv.db(ENGINE, CONFIG);
+        expect(db.exists('key1')).to.be.false;
+        db.put('key1', 'value1');
+        expect(db.exists('key1')).to.be.true;
+        expect(db.get('key1')).to.equal('value1');
+        db.stop();
     });
 
     it('puts binary key', () => {
-        const kv = new pmemkv.KVEngine(ENGINE, CONFIG);
-        kv.put("A\0B\0\0C", 'value1');
-        expect(kv.exists("A\0B\0\0C")).to.be.true;
-        expect(kv.get("A\0B\0\0C")).to.equal('value1');
-        kv.stop();
+        const db = new pmemkv.db(ENGINE, CONFIG);
+        db.put("A\0B\0\0C", 'value1');
+        expect(db.exists("A\0B\0\0C")).to.be.true;
+        expect(db.get("A\0B\0\0C")).to.equal('value1');
+        db.stop();
     });
 
     it('puts binary value', () => {
-        const kv = new pmemkv.KVEngine(ENGINE, CONFIG);
-        kv.put('key1', "A\0B\0\0C");
-        expect(kv.get('key1')).to.equal("A\0B\0\0C");
-        kv.stop();
+        const db = new pmemkv.db(ENGINE, CONFIG);
+        db.put('key1', "A\0B\0\0C");
+        expect(db.get('key1')).to.equal("A\0B\0\0C");
+        db.stop();
     });
 
     it('puts complex value', () => {
-        const kv = new pmemkv.KVEngine(ENGINE, CONFIG);
+        const db = new pmemkv.db(ENGINE, CONFIG);
         const val = 'one\ttwo or <p>three</p>\n {four}   and ^five';
-        kv.put('key1', val);
-        expect(kv.get('key1')).to.equal(val);
-        kv.stop();
+        db.put('key1', val);
+        expect(db.get('key1')).to.equal(val);
+        db.stop();
     });
 
     it('puts empty key', () => {
-        const kv = new pmemkv.KVEngine(ENGINE, CONFIG);
-        kv.put('', 'empty');
-        kv.put(' ', 'single-space');
-        kv.put('\t\t', 'two-tab');
-        expect(kv.exists('')).to.be.true;
-        expect(kv.get('')).to.equal('empty');
-        expect(kv.exists(' ')).to.be.true;
-        expect(kv.get(' ')).to.equal('single-space');
-        expect(kv.exists('\t\t')).to.be.true;
-        expect(kv.get('\t\t')).to.equal('two-tab');
-        kv.stop();
+        const db = new pmemkv.db(ENGINE, CONFIG);
+        db.put('', 'empty');
+        db.put(' ', 'single-space');
+        db.put('\t\t', 'two-tab');
+        expect(db.exists('')).to.be.true;
+        expect(db.get('')).to.equal('empty');
+        expect(db.exists(' ')).to.be.true;
+        expect(db.get(' ')).to.equal('single-space');
+        expect(db.exists('\t\t')).to.be.true;
+        expect(db.get('\t\t')).to.equal('two-tab');
+        db.stop();
     });
 
     it('puts empty value', () => {
-        const kv = new pmemkv.KVEngine(ENGINE, CONFIG);
-        kv.put('empty', '');
-        kv.put('single-space', ' ');
-        kv.put('two-tab', '\t\t');
-        expect(kv.get('empty')).to.equal('');
-        expect(kv.get('single-space')).to.equal(' ');
-        expect(kv.get('two-tab')).to.equal('\t\t');
-        kv.stop();
+        const db = new pmemkv.db(ENGINE, CONFIG);
+        db.put('empty', '');
+        db.put('single-space', ' ');
+        db.put('two-tab', '\t\t');
+        expect(db.get('empty')).to.equal('');
+        expect(db.get('single-space')).to.equal(' ');
+        expect(db.get('two-tab')).to.equal('\t\t');
+        db.stop();
     });
 
     it('puts multiple values', () => {
-        const kv = new pmemkv.KVEngine(ENGINE, CONFIG);
-        kv.put('key1', 'value1');
-        kv.put('key2', 'value2');
-        kv.put('key3', 'value3');
-        expect(kv.exists('key1')).to.be.true;
-        expect(kv.get('key1')).to.equal('value1');
-        expect(kv.exists('key2')).to.be.true;
-        expect(kv.get('key2')).to.equal('value2');
-        expect(kv.exists('key3')).to.be.true;
-        expect(kv.get('key3')).to.equal('value3');
-        kv.stop();
+        const db = new pmemkv.db(ENGINE, CONFIG);
+        db.put('key1', 'value1');
+        db.put('key2', 'value2');
+        db.put('key3', 'value3');
+        expect(db.exists('key1')).to.be.true;
+        expect(db.get('key1')).to.equal('value1');
+        expect(db.exists('key2')).to.be.true;
+        expect(db.get('key2')).to.equal('value2');
+        expect(db.exists('key3')).to.be.true;
+        expect(db.get('key3')).to.equal('value3');
+        db.stop();
     });
 
     it('puts overwriting existing value', () => {
-        const kv = new pmemkv.KVEngine(ENGINE, CONFIG);
-        kv.put('key1', 'value1');
-        expect(kv.get('key1')).to.equal('value1');
-        kv.put('key1', 'value123');
-        expect(kv.get('key1')).to.equal('value123');
-        kv.put('key1', 'asdf');
-        expect(kv.get('key1')).to.equal('asdf');
-        kv.stop();
+        const db = new pmemkv.db(ENGINE, CONFIG);
+        db.put('key1', 'value1');
+        expect(db.get('key1')).to.equal('value1');
+        db.put('key1', 'value123');
+        expect(db.get('key1')).to.equal('value123');
+        db.put('key1', 'asdf');
+        expect(db.get('key1')).to.equal('asdf');
+        db.stop();
     });
 
     it('puts utf-8 key', () => {
-        const kv = new pmemkv.KVEngine(ENGINE, CONFIG);
+        const db = new pmemkv.db(ENGINE, CONFIG);
         const val = 'to remember, note, record';
-        kv.put('记', val);
-        expect(kv.exists('记')).to.be.true;
-        expect(kv.get('记')).to.equal(val);
-        kv.stop();
+        db.put('记', val);
+        expect(db.exists('记')).to.be.true;
+        expect(db.get('记')).to.equal(val);
+        db.stop();
     });
 
     it('puts utf-8 value', () => {
-        const kv = new pmemkv.KVEngine(ENGINE, CONFIG);
+        const db = new pmemkv.db(ENGINE, CONFIG);
         const val = '记 means to remember, note, record';
-        kv.put('key1', val);
-        expect(kv.get('key1')).to.equal(val);
-        kv.stop();
+        db.put('key1', val);
+        expect(db.get('key1')).to.equal(val);
+        db.stop();
     });
 
     it('removes key and value', () => {
-        const kv = new pmemkv.KVEngine(ENGINE, CONFIG);
-        kv.put('key1', 'value1');
-        expect(kv.exists('key1')).to.be.true;
-        expect(kv.get('key1')).to.equal('value1');
-        expect(kv.remove('key1')).to.be.true;
-        expect(kv.remove('key1')).to.be.false;
-        expect(kv.exists('key1')).to.be.false;
-        expect(kv.get('key1')).not.to.exist;
-        kv.stop();
+        const db = new pmemkv.db(ENGINE, CONFIG);
+        db.put('key1', 'value1');
+        expect(db.exists('key1')).to.be.true;
+        expect(db.get('key1')).to.equal('value1');
+        expect(db.remove('key1')).to.be.true;
+        expect(db.remove('key1')).to.be.false;
+        expect(db.exists('key1')).to.be.false;
+        expect(db.get('key1')).not.to.exist;
+        db.stop();
     });
 
     it('throws exception on start when config is empty', () => {
-        let kv = undefined;
+        let db = undefined;
         try {
-            kv = new pmemkv.KVEngine(ENGINE, "{}");
+            db = new pmemkv.db(ENGINE, "{}");
             expect(true).to.be.false;
         } catch (e) {
-            expect(e.message).to.equal('Config does not include valid path string');
+            // XXX replace with:
+            // expect(e.message).to.equal('Config does not include valid path string');
+            // when pmemkv_errmsg() is implemented
+            expect(e.message).to.equal('pmemkv_open() failed');
         }
-        expect(kv).not.to.exist;
+        expect(db).not.to.exist;
     });
 
     it('throws exception on start when config is malformed', () => {
-        let kv = undefined;
+        let db = undefined;
         try {
-            kv = new pmemkv.KVEngine(ENGINE, "{");
+            db = new pmemkv.db(ENGINE, "{");
             expect(true).to.be.false;
         } catch (e) {
-            expect(e.message).to.equal('Config could not be parsed as JSON');
+            expect(e.message).to.equal('Creating a pmemkv config from JSON string failed');
         }
-        expect(kv).not.to.exist;
+        expect(db).not.to.exist;
     });
 
     it('throws exception on start when engine is invalid', () => {
-        let kv = undefined;
+        let db = undefined;
         try {
-            kv = new pmemkv.KVEngine('nope.nope', CONFIG);
+            db = new pmemkv.db('nope.nope', CONFIG);
             expect(true).to.be.false;
         } catch (e) {
-            expect(e.message).to.equal('Unknown engine name');
+            // XXX replace with:
+            // expect(e.message).to.equal('Unknown engine name');
+            // when pmemkv_errmsg() is implemented
+            expect(e.message).to.equal('pmemkv_open() failed');
         }
-        expect(kv).not.to.exist;
+        expect(db).not.to.exist;
     });
 
     it('throws exception on start when path is invalid', () => {
-        let kv = undefined;
+        let db = undefined;
         try {
             let config = `{"path":"/tmp/123/234/345/456/567/678/nope.nope"}`;
-            kv = new pmemkv.KVEngine(ENGINE, config);
+            db = new pmemkv.db(ENGINE, config);
             expect(true).to.be.false;
         } catch (e) {
-            expect(e.message).to.equal('Config path is not an existing directory');
+            // XXX replace with:
+            // expect(e.message).to.equal('Config path is not an existing directory');
+            // when pmemkv_errmsg() is implemented
+            expect(e.message).to.equal('pmemkv_open() failed');
         }
-        expect(kv).not.to.exist;
+        expect(db).not.to.exist;
     });
 
     it('throws exception on start when path is wrong type', () => {
-        let kv = undefined;
+        let db = undefined;
         try {
             let config = '{"path":1234}';
-            kv = new pmemkv.KVEngine(ENGINE, config);
+            db = new pmemkv.db(ENGINE, config);
             expect(true).to.be.false;
         } catch (e) {
-            expect(e.message).to.equal('Config does not include valid path string');
+            // XXX replace with:
+            // expect(e.message).to.equal('Config does not include valid path string');
+            // when pmemkv_errmsg() is implemented
+            expect(e.message).to.equal('pmemkv_open() failed');
         }
-        expect(kv).not.to.exist;
+        expect(db).not.to.exist;
     });
 
-    it('uses all test', () => {
-        const kv = new pmemkv.KVEngine(ENGINE, CONFIG);
-        kv.put('1', 'one');
-        kv.put('2', 'two');
-        kv.put('记!', 'RR');
+    it('uses count_all test', () => {
+        const db = new pmemkv.db(ENGINE, CONFIG);
+        db.put('A', '1');
+        db.put('AB', '2');
+        db.put('AC', '3');
+        db.put('B', '4');
+        db.put('BB', '5');
+        db.put('BC', '6');
+        db.put('BD', '7');
+        expect(db.count_all).to.equal(7);
+
+        expect(db.count_above('')).to.equal(7);
+        expect(db.count_above('A')).to.equal(6);
+        expect(db.count_above('B')).to.equal(3);
+        expect(db.count_above('BC')).to.equal(1);
+        expect(db.count_above('BD')).to.equal(0);
+        expect(db.count_above('Z')).to.equal(0);
+
+        expect(db.count_below('')).to.equal(0);
+        expect(db.count_below('A')).to.equal(0);
+        expect(db.count_below('B')).to.equal(3);
+        expect(db.count_below('BD')).to.equal(6);
+        expect(db.count_below('ZZZZZ')).to.equal(7);
+
+        expect(db.count_between('', 'ZZZZ')).to.equal(7);
+        expect(db.count_between('', 'A')).to.equal(0);
+        expect(db.count_between('', 'B')).to.equal(3);
+        expect(db.count_between('A', 'B')).to.equal(2);
+        expect(db.count_between('B', 'ZZZZ')).to.equal(3);
+
+        expect(db.count_between('', '')).to.equal(0);
+        expect(db.count_between('A', 'A')).to.equal(0);
+        expect(db.count_between('AC', 'A')).to.equal(0);
+        expect(db.count_between('B', 'A')).to.equal(0);
+        expect(db.count_between('BD', 'A')).to.equal(0);
+        expect(db.count_between('ZZZ', 'B')).to.equal(0);
+
+        db.stop();
+    });
+
+    it('uses get_all test', () => {
+        const db = new pmemkv.db(ENGINE, CONFIG);
+        db.put('1', 'one');
+        db.put('2', 'two');
+        db.put('记!', 'RR');
 
         let x = '';
-        kv.all((k) => x += `<${k}>,`);
-        expect(x).to.equal('<1>,<2>,<记!>,');
-
-        kv.stop();
-    });
-
-    it('uses all above test', () => {
-        const kv = new pmemkv.KVEngine(ENGINE, CONFIG);
-        kv.put('A', '1');
-        kv.put('AB', '2');
-        kv.put('AC', '3');
-        kv.put('B', '4');
-        kv.put('BB', '5');
-        kv.put('BC', '6');
-        kv.put('记!', 'RR');
-
-        let x = '';
-        kv.all_above('B', (k) => x += `${k},`);
-        expect(x).to.equal('BB,BC,记!,');
-
-        x = '';
-        kv.all_above('', (k) => x += `${k},`);
-        expect(x).to.equal('A,AB,AC,B,BB,BC,记!,');
-
-        kv.stop();
-    });
-
-    it('uses all below test', () => {
-        const kv = new pmemkv.KVEngine(ENGINE, CONFIG);
-        kv.put('A', '1');
-        kv.put('AB', '2');
-        kv.put('AC', '3');
-        kv.put('B', '4');
-        kv.put('BB', '5');
-        kv.put('BC', '6');
-        kv.put('记!', 'RR');
-
-        let x = '';
-        kv.all_below('B', (k) => x += `${k},`);
-        expect(x).to.equal('A,AB,AC,');
-
-        x = '';
-        kv.all_below('\uFFFF', (k) => x += `${k},`);
-        expect(x).to.equal('A,AB,AC,B,BB,BC,记!,');
-
-        kv.stop();
-    });
-
-    it('uses all between test', () => {
-        const kv = new pmemkv.KVEngine(ENGINE, CONFIG);
-        kv.put('A', '1');
-        kv.put('AB', '2');
-        kv.put('AC', '3');
-        kv.put('B', '4');
-        kv.put('BB', '5');
-        kv.put('BC', '6');
-        kv.put('记!', 'RR');
-
-        let x = '';
-        kv.all_between('A', 'B', (k) => x += `${k},`);
-        expect(x).to.equal('AB,AC,');
-
-        x = '';
-        kv.all_between('B', '\uFFFF', (k) => x += `${k},`);
-        expect(x).to.equal('BB,BC,记!,');
-
-        x = '';
-        kv.all_between('', '', (k) => x += `${k},`);
-        kv.all_between('A', 'A', (k) => x += `${k},`);
-        kv.all_between('B', 'A', (k) => x += `${k},`);
-        expect(x).to.equal('');
-
-        kv.stop();
-    });
-
-    it('uses count test', () => {
-        const kv = new pmemkv.KVEngine(ENGINE, CONFIG);
-        kv.put('A', '1');
-        kv.put('AB', '2');
-        kv.put('AC', '3');
-        kv.put('B', '4');
-        kv.put('BB', '5');
-        kv.put('BC', '6');
-        kv.put('BD', '7');
-        expect(kv.count).to.equal(7);
-
-        expect(kv.count_above('')).to.equal(7);
-        expect(kv.count_above('A')).to.equal(6);
-        expect(kv.count_above('B')).to.equal(3);
-        expect(kv.count_above('BC')).to.equal(1);
-        expect(kv.count_above('BD')).to.equal(0);
-        expect(kv.count_above('Z')).to.equal(0);
-
-        expect(kv.count_below('')).to.equal(0);
-        expect(kv.count_below('A')).to.equal(0);
-        expect(kv.count_below('B')).to.equal(3);
-        expect(kv.count_below('BD')).to.equal(6);
-        expect(kv.count_below('ZZZZZ')).to.equal(7);
-
-        expect(kv.count_between('', 'ZZZZ')).to.equal(7);
-        expect(kv.count_between('', 'A')).to.equal(0);
-        expect(kv.count_between('', 'B')).to.equal(3);
-        expect(kv.count_between('A', 'B')).to.equal(2);
-        expect(kv.count_between('B', 'ZZZZ')).to.equal(3);
-
-        expect(kv.count_between('', '')).to.equal(0);
-        expect(kv.count_between('A', 'A')).to.equal(0);
-        expect(kv.count_between('AC', 'A')).to.equal(0);
-        expect(kv.count_between('B', 'A')).to.equal(0);
-        expect(kv.count_between('BD', 'A')).to.equal(0);
-        expect(kv.count_between('ZZZ', 'B')).to.equal(0);
-
-        kv.stop();
-    });
-
-    it('uses each test', () => {
-        const kv = new pmemkv.KVEngine(ENGINE, CONFIG);
-        kv.put('1', 'one');
-        kv.put('2', 'two');
-        kv.put('记!', 'RR');
-
-        let x = '';
-        kv.each((k, v) => x += `<${k}>,<${v}>|`);
+        db.get_all((k, v) => x += `<${k}>,<${v}>|`);
         expect(x).to.equal('<1>,<one>|<2>,<two>|<记!>,<RR>|');
 
-        kv.stop();
+        db.stop();
     });
 
-    it('uses each above test', () => {
-        const kv = new pmemkv.KVEngine(ENGINE, CONFIG);
-        kv.put('A', '1');
-        kv.put('AB', '2');
-        kv.put('AC', '3');
-        kv.put('B', '4');
-        kv.put('BB', '5');
-        kv.put('BC', '6');
-        kv.put('记!', 'RR');
+    it('uses get_above test', () => {
+        const db = new pmemkv.db(ENGINE, CONFIG);
+        db.put('A', '1');
+        db.put('AB', '2');
+        db.put('AC', '3');
+        db.put('B', '4');
+        db.put('BB', '5');
+        db.put('BC', '6');
+        db.put('记!', 'RR');
 
         let x = '';
-        kv.each_above('B', (k, v) => x += `${k},${v}|`);
+        db.get_above('B', (k, v) => x += `${k},${v}|`);
         expect(x).to.equal('BB,5|BC,6|记!,RR|');
 
         x = '';
-        kv.each_above('', (k, v) => x += `${k},${v}|`);
+        db.get_above('', (k, v) => x += `${k},${v}|`);
         expect(x).to.equal('A,1|AB,2|AC,3|B,4|BB,5|BC,6|记!,RR|');
 
-        kv.stop();
+        db.stop();
     });
 
-    it('uses each below test', () => {
-        const kv = new pmemkv.KVEngine(ENGINE, CONFIG);
-        kv.put('A', '1');
-        kv.put('AB', '2');
-        kv.put('AC', '3');
-        kv.put('B', '4');
-        kv.put('BB', '5');
-        kv.put('BC', '6');
-        kv.put('记!', 'RR');
+    it('uses get_below test', () => {
+        const db = new pmemkv.db(ENGINE, CONFIG);
+        db.put('A', '1');
+        db.put('AB', '2');
+        db.put('AC', '3');
+        db.put('B', '4');
+        db.put('BB', '5');
+        db.put('BC', '6');
+        db.put('记!', 'RR');
 
         let x = '';
-        kv.each_below('AC', (k, v) => x += `${k},${v}|`);
+        db.get_below('AC', (k, v) => x += `${k},${v}|`);
         expect(x).to.equal('A,1|AB,2|');
 
         x = '';
-        kv.each_below('\uFFFF', (k, v) => x += `${k},${v}|`);
+        db.get_below('\uFFFF', (k, v) => x += `${k},${v}|`);
         expect(x).to.equal('A,1|AB,2|AC,3|B,4|BB,5|BC,6|记!,RR|');
 
-        kv.stop();
+        db.stop();
     });
 
-    it('uses each between test', () => {
-        const kv = new pmemkv.KVEngine(ENGINE, CONFIG);
-        kv.put('A', '1');
-        kv.put('AB', '2');
-        kv.put('AC', '3');
-        kv.put('B', '4');
-        kv.put('BB', '5');
-        kv.put('BC', '6');
-        kv.put('记!', 'RR');
+    it('uses get_between test', () => {
+        const db = new pmemkv.db(ENGINE, CONFIG);
+        db.put('A', '1');
+        db.put('AB', '2');
+        db.put('AC', '3');
+        db.put('B', '4');
+        db.put('BB', '5');
+        db.put('BC', '6');
+        db.put('记!', 'RR');
 
         let x = '';
-        kv.each_between('A', 'B', (k, v) => x += `${k},${v}|`);
+        db.get_between('A', 'B', (k, v) => x += `${k},${v}|`);
         expect(x).to.equal('AB,2|AC,3|');
 
         x = '';
-        kv.each_between('B', '\uFFFF', (k, v) => x += `${k},${v}|`);
+        db.get_between('B', '\uFFFF', (k, v) => x += `${k},${v}|`);
         expect(x).to.equal('BB,5|BC,6|记!,RR|');
 
         x = '';
-        kv.each_between('', '', (k, v) => x += `${k},${v}|`);
-        kv.each_between('A', 'A', (k, v) => x += `${k},${v}|`);
-        kv.each_between('B', 'A', (k, v) => x += `${k},${v}|`);
+        db.get_between('', '', (k, v) => x += `${k},${v}|`);
+        db.get_between('A', 'A', (k, v) => x += `${k},${v}|`);
+        db.get_between('B', 'A', (k, v) => x += `${k},${v}|`);
         expect(x).to.equal('');
 
-        kv.stop();
+        db.stop();
     });
 
 });
