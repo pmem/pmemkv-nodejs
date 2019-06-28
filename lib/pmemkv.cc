@@ -31,10 +31,10 @@
  */
 
 #include <napi.h>
-#include "kvengine.h"
+#include "database.h"
 
 Napi::Object initAll(Napi::Env env, Napi::Object exports) {
-    return KVEngine::init(env, exports);
+    return db::init(env, exports);
 }
 
 NODE_API_MODULE(pmemkv, initAll)

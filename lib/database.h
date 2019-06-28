@@ -34,36 +34,36 @@
 #define ENGINE_H
 
 #include <iostream>
-#include <libpmemkv.h>
+#include <libpmemkv.hpp>
 #include <napi.h>
 
-class KVEngine : public Napi::ObjectWrap<KVEngine> {
+class db : public Napi::ObjectWrap<db> {
   public:
     static Napi::Object init(Napi::Env env, Napi::Object exports);
-    KVEngine(const Napi::CallbackInfo& info);
+    db(const Napi::CallbackInfo& info);
 
   private:
     static Napi::FunctionReference constructor;
 
     Napi::Value stop(const Napi::CallbackInfo& info);
-    Napi::Value all(const Napi::CallbackInfo& info);
-    Napi::Value all_above(const Napi::CallbackInfo& info);
-    Napi::Value all_below(const Napi::CallbackInfo& info);
-    Napi::Value all_between(const Napi::CallbackInfo& info);
-    Napi::Value count(const Napi::CallbackInfo& info);
+    Napi::Value get_keys(const Napi::CallbackInfo& info);
+    Napi::Value get_keys_above(const Napi::CallbackInfo& info);
+    Napi::Value get_keys_below(const Napi::CallbackInfo& info);
+    Napi::Value get_keys_between(const Napi::CallbackInfo& info);
+    Napi::Value count_all(const Napi::CallbackInfo& info);
     Napi::Value count_above(const Napi::CallbackInfo& info);
     Napi::Value count_below(const Napi::CallbackInfo& info);
     Napi::Value count_between(const Napi::CallbackInfo& info);
-    Napi::Value each(const Napi::CallbackInfo& info);
-    Napi::Value each_above(const Napi::CallbackInfo& info);
-    Napi::Value each_below(const Napi::CallbackInfo& info);
-    Napi::Value each_between(const Napi::CallbackInfo& info);
+    Napi::Value get_all(const Napi::CallbackInfo& info);
+    Napi::Value get_above(const Napi::CallbackInfo& info);
+    Napi::Value get_below(const Napi::CallbackInfo& info);
+    Napi::Value get_between(const Napi::CallbackInfo& info);
     Napi::Value exists(const Napi::CallbackInfo& info);
     Napi::Value get(const Napi::CallbackInfo& info);
     Napi::Value put(const Napi::CallbackInfo& info);
     Napi::Value remove(const Napi::CallbackInfo& info);
 
-    pmemkv::KVEngine* _kv;
+    pmem::kv::db _db;
 };
 
 #endif
