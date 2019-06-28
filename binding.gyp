@@ -2,7 +2,7 @@
   "targets": [
     {
       "target_name": "pmemkv",
-      "sources": ["lib/kvengine.cc", "lib/pmemkv.cc"],
+      "sources": ["lib/database.cc", "lib/pmemkv.cc"],
       "include_dirs": [
           "<!@(node -p \"require('node-addon-api').include\")"
       ],
