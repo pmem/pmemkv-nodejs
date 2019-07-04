@@ -48,7 +48,7 @@ We are using `/dev/shm` to
 in this simple example.
 
 ```js
-const Database = require('/lib/database');
+const Database = require('./lib/database');
 
 function assert(condition) {
     if (!condition) throw new Error('Assert failed');
