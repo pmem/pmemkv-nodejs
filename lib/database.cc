@@ -84,7 +84,7 @@ db::db(const Napi::CallbackInfo& info) : Napi::ObjectWrap<db>(info), _db() {
         return;
     }
 
-    auto status = this->_db.open(engine.c_str(), cfg);
+    auto status = this->_db.open(engine.c_str(), pmem::kv::config(cfg));
     if (status != pmem::kv::status::OK)
         Napi::Error::New(env, "pmemkv_open() failed").ThrowAsJavaScriptException();
 }
