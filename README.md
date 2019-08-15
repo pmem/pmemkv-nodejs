@@ -1,10 +1,9 @@
 # pmemkv-nodejs
 Node.js bindings for pmemkv
 
-*This is experimental pre-release software and should not be used in
-production systems. APIs and file formats may change at any time without
-preserving backwards compatibility. All known issues and limitations
-are logged as GitHub issues.*
+The current API is simplified and not functionally equal to its native C/C++ counterpart.
+In the future existing API may be extended in idiomatic way without preserving backward compatibility.
+All known issues and limitations are logged as GitHub issues.
 
 ## Dependencies
 
@@ -21,44 +20,36 @@ are logged as GitHub issues.*
 
 Start by installing [pmemkv](https://github.com/pmem/pmemkv/blob/master/INSTALLING.md) on your system.
 
-Add npm module to your project:
+Clone the pmemkv-nodejs tree:
 
 ```
-npm install pmem/pmemkv-nodejs --save
+git clone https://github.com/pmem/pmemkv-nodejs.git
+cd pmemkv-nodejs
+```
+
+Add npm modules to your project (install the dependencies listed in package.json in the local node_modules folder):
+
+```
+npm install
+```
+
+## Testing
+
+This library includes a set of automated tests that exercise all functionality.
+
+```
+LD_LIBRARY_PATH=path_to_your_libs npm test
 ```
 
 ## Example
 
 We are using `/dev/shm` to
 [emulate persistent memory](http://pmem.io/2016/02/22/pm-emulation.html)
-in this simple example.
+in example.
 
-```js
-const pmemkv = require('pmemkv');
-
-function assert(condition) {
-    if (!condition) throw new Error('Assert failed');
-}
-
-console.log('Starting engine');
-const kv = new KVEngine('vmap', '{"path":"/dev/shm/"}');
-
-console.log('Putting new key');
-kv.put('key1', 'value1');
-assert(kv.count === 1);
-
-console.log('Reading key back');
-assert(kv.get('key1') === 'value1');
-
-console.log('Iterating existing keys');
-kv.put('key2', 'value2');
-kv.put('key3', 'value3');
-kv.all((k) => console.log(`  visited: ${k}`));
-
-console.log('Removing existing key');
-kv.remove('key1');
-assert(!kv.exists('key1'));
-
-console.log('Stopping engine');
-kv.stop();
+Example can be found within this repository in [examples directory](https://github.com/pmem/pmemkv-nodejs/tree/master/examples).
+To execute the example:
 ```
+PMEM_IS_PMEM_FORCE=1 node basic_example.js
+```
+

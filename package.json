@@ -1,6 +1,6 @@
 {
   "name": "pmemkv",
-  "version": "0.0.1",
+  "version": "0.8.0",
   "description": "Node.js bindings for pmemkv",
   "main": "./lib/all.js",
   "directories": {
@@ -13,7 +13,7 @@
     "type": "git",
     "url": "git+https://github.com/pmem/pmemkv-nodejs.git"
   },
-  "author": "Rob Dickinson (https://github.com/RobDickinson)",
+  "author": "Szymon Romik (https://github.com/szyrom)",
   "license": "BSD-3-Clause",
   "bugs": {
     "url": "https://github.com/pmem/pmemkv-nodejs/issues"
