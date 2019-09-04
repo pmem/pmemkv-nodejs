@@ -71,20 +71,38 @@ db::db(const Napi::CallbackInfo& info) : Napi::ObjectWrap<db>(info), _db() {
     if (length != 2)
         Napi::TypeError::New(env, "invalid arguments").ThrowAsJavaScriptException();
     std::string engine = info[0].As<Napi::String>().Utf8Value();
-    std::string config = info[1].As<Napi::String>().Utf8Value();
-
-    pmemkv_config *cfg = pmemkv_config_new();
-    if (!cfg)
-        Napi::Error::New(env, "Allocating a pmemkv config failed").ThrowAsJavaScriptException();
-
-    int rv = pmemkv_config_from_json(cfg, config.c_str());
-    if (rv) {
-        pmemkv_config_delete(cfg);
-        Napi::Error::New(env, "Creating a pmemkv config from JSON string failed").ThrowAsJavaScriptException();
+    Napi::Object config = info[1].As<Napi::Object>();
+    Napi::Array props = config.GetPropertyNames();
+    if (props.Length() == 0){
+        Napi::Error::New(env, "invalid config object").ThrowAsJavaScriptException();
         return;
     }
 
-    auto status = this->_db.open(engine.c_str(), pmem::kv::config(cfg));
+    pmem::kv::config cfg;
+    for (uint32_t i = 0; i < props.Length(); ++i) {
+        Napi::Value key = props.Get(i);
+        Napi::Value value = config.Get(key);
+        if (!key.IsString()){
+            Napi::Error::New(env, "invalid config object").ThrowAsJavaScriptException();
+            return;
+        }
+        if (value.IsString()){
+            auto status = cfg.put_string(key.As<Napi::String>().Utf8Value(), value.As<Napi::String>().Utf8Value());
+	        if (status != pmem::kv::status::OK)
+                Napi::Error::New(env, "invalid config object").ThrowAsJavaScriptException();
+        }
+        else if (value.IsNumber()){
+            auto status = cfg.put_uint64(key.As<Napi::String>().Utf8Value(), value.As<Napi::Number>().Uint32Value());
+            if (status != pmem::kv::status::OK)
+                Napi::Error::New(env, "invalid config object").ThrowAsJavaScriptException();
+        }
+        else {
+            Napi::Error::New(env, "invalid config object").ThrowAsJavaScriptException();
+            return;
+        }
+    }
+
+    auto status = this->_db.open(engine.c_str(), std::move(cfg));
     if (status != pmem::kv::status::OK)
         Napi::Error::New(env, "pmemkv_open() failed").ThrowAsJavaScriptException();
 }
