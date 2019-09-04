@@ -5,7 +5,8 @@ function assert(condition) {
 }
 
 console.log('Starting engine');
-const db = new Database('vsmap', '{"path":"/dev/shm", "size":1073741824}');
+let config = {"path":"/dev/shm", "size":1073741824};
+const db = new Database('vsmap', config);
 
 console.log('Putting new key');
 db.put('key1', 'value1');
