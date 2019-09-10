@@ -82,11 +82,11 @@ db::db(const Napi::CallbackInfo& info) : Napi::ObjectWrap<db>(info), _db() {
     pmem::kv::config cfg;
     for (uint32_t i = 0; i < props.Length(); ++i) {
         Napi::Value key = props.Get(i);
-        Napi::Value value = config.Get(key);
         if (!key.IsString()){
             Napi::Error::New(env, "invalid config object").ThrowAsJavaScriptException();
             return;
         }
+        Napi::Value value = config.Get(key);
         if (value.IsString()){
             auto status = cfg.put_string(key.As<Napi::String>().Utf8Value(), value.As<Napi::String>().Utf8Value());
 	        if (status != pmem::kv::status::OK)
@@ -98,7 +98,7 @@ db::db(const Napi::CallbackInfo& info) : Napi::ObjectWrap<db>(info), _db() {
                 Napi::Error::New(env, "invalid config object").ThrowAsJavaScriptException();
         }
         else {
-            Napi::Error::New(env, "invalid config object").ThrowAsJavaScriptException();
+            Napi::Error::New(env, "not implemented").ThrowAsJavaScriptException();
             return;
         }
     }
