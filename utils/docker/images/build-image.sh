@@ -32,9 +32,9 @@
 
 #
 # build-image.sh <OS-VER> - prepares a Docker image with <OS>-based
-#                           environment for testing pmemkv-ruby, according
-#                           to the Dockerfile.<OS-VER> file located
-#                           in the same directory.
+#                           environment for testing pmemkv-nodejs,
+#                           according to the Dockerfile.<OS-VER> file
+#                           located in the same directory.
 #
 # The script can be run locally.
 #
