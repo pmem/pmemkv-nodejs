@@ -32,6 +32,7 @@
 
 #include "database.h"
 #include <string>
+#include <libpmemkv_json_config.h>
 
 Napi::FunctionReference db::constructor;
 
