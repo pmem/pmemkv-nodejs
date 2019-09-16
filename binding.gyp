@@ -12,6 +12,7 @@
       ],
        "libraries": [
         "-lpmemkv",
+        "-lpmemkv_json_config",
        ],
        'cflags_cc!': [ '-fno-rtti'],
        'cflags_cc': ['-fexceptions']
