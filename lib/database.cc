@@ -229,7 +229,7 @@ Napi::Value db::get(const Napi::CallbackInfo& info) {
         return Napi::String::New(env, value);
     else if (status == pmem::kv::status::NOT_FOUND) {
         return env.Undefined();
-    } else if (status == pmem::kv::status::FAILED) {
+    } else if (status == pmem::kv::status::UNKNOWN_ERROR) {
         Napi::Error::New(env, "Unable to get key").ThrowAsJavaScriptException();
     }
     return Napi::Value();
@@ -240,7 +240,7 @@ Napi::Value db::put(const Napi::CallbackInfo& info) {
     std::string key = info[0].As<Napi::String>().Utf8Value();
     std::string value = info[1].As<Napi::String>().Utf8Value();
     pmem::kv::status status = this->_db.put(key, value);
-    if (status == pmem::kv::status::FAILED) Napi::Error::New(env, "Unable to put key").ThrowAsJavaScriptException();
+    if (status == pmem::kv::status::UNKNOWN_ERROR) Napi::Error::New(env, "Unable to put key").ThrowAsJavaScriptException();
     return Napi::Value();
 }
 
@@ -248,6 +248,6 @@ Napi::Value db::remove(const Napi::CallbackInfo& info) {
     Napi::Env env = info.Env();
     std::string key = info[0].As<Napi::String>().Utf8Value();
     pmem::kv::status status = this->_db.remove(key);
-    if (status == pmem::kv::status::FAILED) Napi::Error::New(env, "Unable to remove key").ThrowAsJavaScriptException();
+    if (status == pmem::kv::status::UNKNOWN_ERROR) Napi::Error::New(env, "Unable to remove key").ThrowAsJavaScriptException();
     return Napi::Boolean::New(env, (status == pmem::kv::status::OK));
 }
