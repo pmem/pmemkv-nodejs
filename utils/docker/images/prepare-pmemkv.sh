@@ -40,8 +40,8 @@ package_type=$1
 
 # stable_pmemkv_version="0.8"
 
-# commit: Merge pull request #405 from ldorau/Install-pmreorder-in-Docker-images; 23.08.2019
-current_pmemkv_version="19fadbf50e93e9c6c234b1a6a520452424c46272"
+# commit: Merge pull request #430 from ldorau/Add-libpmemkv_json-helper-library; 17.09.2019
+current_pmemkv_version="4e17b6a9c7d5607741f9fed450aeece819ea870c"
 
 prepare_pmemkv () {
 	pmemkv_version="$1"
