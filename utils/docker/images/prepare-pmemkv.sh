@@ -40,7 +40,11 @@ package_type=$1
 
 # stable_pmemkv_version="0.8"
 
+<<<<<<< HEAD
 # Merge pull request #445 from ldorau/Add-testing-python-bindings-on-Travis, 24.09.2019
+=======
+# commit: Merge pull request #445 from ldorau/Add-testing-python-bindings-on-Travis; 24.09.2019
+>>>>>>> update pmemkv version in travis
 current_pmemkv_version="99585189eba2e0a4d3e70aa17055557c0ab96789"
 
 prepare_pmemkv () {
