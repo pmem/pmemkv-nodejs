@@ -37,6 +37,7 @@ const chai = require('chai');
 chai.use(require('chai-string'));
 const expect = chai.expect;
 const pmemkv = require('../lib/all');
+const constants = pmemkv.constants;
 
 describe('db', () => {
 
@@ -208,9 +209,10 @@ describe('db', () => {
             expect(true).to.be.false;
         } catch (e) {
             // XXX replace with:
-            // expect(e.message).to.equal('Config does not include valid path string');
-            // when pmemkv_errmsg() is implemented
-            expect(e.message).to.equal('invalid config object');
+            // expect(e.status).to.equal(constants.status.XXX);
+            // when empty config do not cause a segmentFault in pmemkv
+            expect(e.message).to.equal("invalid config object");
+            
         }
         expect(db).not.to.exist;
     });
@@ -221,7 +223,7 @@ describe('db', () => {
             db = new pmemkv.db(ENGINE, {"path": "/dev/shm"});
             expect(true).to.be.false;
         } catch (e) {
-            expect(e.message).to.equal('pmemkv_open() failed');
+            expect(e.status).to.equal(constants.status.INVALID_ARGUMENT);
         }
         expect(db).not.to.exist;
     });
@@ -232,10 +234,7 @@ describe('db', () => {
             db = new pmemkv.db('nope.nope', CONFIG);
             expect(true).to.be.false;
         } catch (e) {
-            // XXX replace with:
-            // expect(e.message).to.equal('Unknown engine name');
-            // when pmemkv_errmsg() is implemented
-            expect(e.message).to.equal('pmemkv_open() failed');
+            expect(e.status).to.equal(constants.status.WRONG_ENGINE_NAME);
         }
         expect(db).not.to.exist;
     });
@@ -247,10 +246,7 @@ describe('db', () => {
             db = new pmemkv.db(ENGINE, config);
             expect(true).to.be.false;
         } catch (e) {
-            // XXX replace with:
-            // expect(e.message).to.equal('Config path is not an existing directory');
-            // when pmemkv_errmsg() is implemented
-            expect(e.message).to.equal('pmemkv_open() failed');
+            expect(e.status).to.equal(constants.status.INVALID_ARGUMENT);
         }
         expect(db).not.to.exist;
     });
@@ -262,10 +258,7 @@ describe('db', () => {
             db = new pmemkv.db(ENGINE, config);
             expect(true).to.be.false;
         } catch (e) {
-            // XXX replace with:
-            // expect(e.message).to.equal('Config does not include valid path string');
-            // when pmemkv_errmsg() is implemented
-            expect(e.message).to.equal('pmemkv_open() failed');
+            expect(e.status).to.equal(constants.status.INVALID_ARGUMENT);
         }
         expect(db).not.to.exist;
     });
