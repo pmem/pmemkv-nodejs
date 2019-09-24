@@ -11,8 +11,7 @@
           "<!(node -p \"require('node-addon-api').gyp\")"
       ],
        "libraries": [
-        "-lpmemkv",
-        "-lpmemkv_json_config",
+        "-lpmemkv"
        ],
        'cflags_cc!': [ '-fno-rtti'],
        'cflags_cc': ['-fexceptions']
