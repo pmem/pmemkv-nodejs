@@ -40,8 +40,8 @@ package_type=$1
 
 # stable_pmemkv_version="0.8"
 
-# commit: Merge pull request #430 from ldorau/Add-libpmemkv_json-helper-library; 17.09.2019
-current_pmemkv_version="4e17b6a9c7d5607741f9fed450aeece819ea870c"
+# commit: Merge pull request #445 from ldorau/Add-testing-python-bindings-on-Travis; 24.09.2019
+current_pmemkv_version="99585189eba2e0a4d3e70aa17055557c0ab96789"
 
 prepare_pmemkv () {
 	pmemkv_version="$1"
