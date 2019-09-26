@@ -1,4 +1,5 @@
 const Database = require('../lib/database');
+const constants = Database.constants;
 
 function assert(condition) {
     if (!condition) throw new Error('Assert failed');
@@ -9,8 +10,14 @@ let config = {"path":"/dev/shm", "size":1073741824};
 const db = new Database('vsmap', config);
 
 console.log('Putting new key');
-db.put('key1', 'value1');
-assert(db.count_all === 1);
+try{
+    db.put('key1', 'value1');
+    assert(db.count_all === 1);
+}
+catch(e){
+    if (e.status == constants.status.OUT_OF_MEMORY)
+        console.log(e.message);
+}
 
 console.log('Reading key back');
 assert(db.get('key1') === 'value1');
