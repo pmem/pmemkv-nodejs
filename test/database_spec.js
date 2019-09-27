@@ -212,7 +212,6 @@ describe('db', () => {
             // expect(e.status).to.equal(constants.status.XXX);
             // when empty config do not cause a segmentFault in pmemkv
             expect(e.message).to.equal("invalid config object");
-            
         }
         expect(db).not.to.exist;
     });
