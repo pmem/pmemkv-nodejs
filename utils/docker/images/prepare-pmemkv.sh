@@ -40,8 +40,8 @@ package_type=$1
 
 # stable_pmemkv_version="0.8"
 
-# Merge pull request #445 from ldorau/Add-testing-python-bindings-on-Travis, 24.09.2019
-current_pmemkv_version="99585189eba2e0a4d3e70aa17055557c0ab96789"
+# Merge pull request #454 from lukaszstolarczuk/use-correct-memkind-allocator-namespace, 27.09.2019
+current_pmemkv_version="2f087b7e63a6f520474d795dbd8919ec86bf3c8d"
 
 prepare_pmemkv () {
 	pmemkv_version="$1"

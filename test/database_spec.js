@@ -208,10 +208,7 @@ describe('db', () => {
             db = new pmemkv.db(ENGINE, {});
             expect(true).to.be.false;
         } catch (e) {
-            // XXX replace with:
-            // expect(e.status).to.equal(constants.status.XXX);
-            // when empty config do not cause a segmentFault in pmemkv
-            expect(e.message).to.equal("invalid config object");
+            expect(e.status).to.equal(constants.status.INVALID_ARGUMENT);
         }
         expect(db).not.to.exist;
     });
