@@ -40,8 +40,8 @@ set -e
 git clone https://github.com/pmem/libpmemobj-cpp
 cd libpmemobj-cpp
 
-# Add transaction_out_of_memory exception; July 15th
-git checkout 26c86b46997d25c818b246f2a143d2248503cc67
+# Merge pull request #446 from igchor/fix_array_move_ctor, 30.09.2019
+git checkout 732064028f5337b8465cbf218f9c4feb9b2020ac
 
 mkdir build
 cd build
