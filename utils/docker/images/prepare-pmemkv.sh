@@ -40,8 +40,8 @@ package_type=$1
 
 # stable_pmemkv_version="0.8"
 
-# Merge pull request #445 from ldorau/Add-testing-python-bindings-on-Travis, 24.09.2019
-current_pmemkv_version="99585189eba2e0a4d3e70aa17055557c0ab96789"
+# Merge pull request #456 from karczex/multithreaded_cmap_test, 27.09.2019
+current_pmemkv_version="70b4a1272dc0e0be1ed716ff8797092396295759"
 
 prepare_pmemkv () {
 	pmemkv_version="$1"
