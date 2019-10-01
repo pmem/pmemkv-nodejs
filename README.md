@@ -1,8 +1,5 @@
 # pmemkv-nodejs
-Node.js bindings for pmemkv
-
-The current API is simplified and not functionally equal to its native C/C++ counterpart.
-In the future existing API may be extended in idiomatic way without preserving backward compatibility.
+Node.js bindings for pmemkv.
 All known issues and limitations are logged as GitHub issues.
 
 ## Dependencies
