@@ -31,12 +31,13 @@
  */
 
 const ENGINE = 'vsmap';
-const CONFIG = `{"path":"/dev/shm", "size":1073741824}`;
+const CONFIG = {"path":"/dev/shm", "size":1073741824};
 
 const chai = require('chai');
 chai.use(require('chai-string'));
 const expect = chai.expect;
 const pmemkv = require('../lib/all');
+const constants = pmemkv.constants;
 
 describe('db', () => {
 
@@ -204,13 +205,10 @@ describe('db', () => {
     it('throws exception on start when config is empty', () => {
         let db = undefined;
         try {
-            db = new pmemkv.db(ENGINE, "{}");
+            db = new pmemkv.db(ENGINE, {});
             expect(true).to.be.false;
         } catch (e) {
-            // XXX replace with:
-            // expect(e.message).to.equal('Config does not include valid path string');
-            // when pmemkv_errmsg() is implemented
-            expect(e.message).to.equal('pmemkv_open() failed');
+            expect(e.status).to.equal(constants.status.INVALID_ARGUMENT);
         }
         expect(db).not.to.exist;
     });
@@ -218,10 +216,10 @@ describe('db', () => {
     it('throws exception on start when config is malformed', () => {
         let db = undefined;
         try {
-            db = new pmemkv.db(ENGINE, "{");
+            db = new pmemkv.db(ENGINE, {"path": "/dev/shm"});
             expect(true).to.be.false;
         } catch (e) {
-            expect(e.message).to.equal('Creating a pmemkv config from JSON string failed');
+            expect(e.status).to.equal(constants.status.INVALID_ARGUMENT);
         }
         expect(db).not.to.exist;
     });
@@ -232,10 +230,7 @@ describe('db', () => {
             db = new pmemkv.db('nope.nope', CONFIG);
             expect(true).to.be.false;
         } catch (e) {
-            // XXX replace with:
-            // expect(e.message).to.equal('Unknown engine name');
-            // when pmemkv_errmsg() is implemented
-            expect(e.message).to.equal('pmemkv_open() failed');
+            expect(e.status).to.equal(constants.status.WRONG_ENGINE_NAME);
         }
         expect(db).not.to.exist;
     });
@@ -243,14 +238,11 @@ describe('db', () => {
     it('throws exception on start when path is invalid', () => {
         let db = undefined;
         try {
-            let config = `{"path":"/tmp/123/234/345/456/567/678/nope.nope"}`;
+            let config = {"path":"/tmp/123/234/345/456/567/678/nope.nope"};
             db = new pmemkv.db(ENGINE, config);
             expect(true).to.be.false;
         } catch (e) {
-            // XXX replace with:
-            // expect(e.message).to.equal('Config path is not an existing directory');
-            // when pmemkv_errmsg() is implemented
-            expect(e.message).to.equal('pmemkv_open() failed');
+            expect(e.status).to.equal(constants.status.INVALID_ARGUMENT);
         }
         expect(db).not.to.exist;
     });
@@ -258,14 +250,11 @@ describe('db', () => {
     it('throws exception on start when path is wrong type', () => {
         let db = undefined;
         try {
-            let config = '{"path":1234}';
+            let config = {"path":1234};
             db = new pmemkv.db(ENGINE, config);
             expect(true).to.be.false;
         } catch (e) {
-            // XXX replace with:
-            // expect(e.message).to.equal('Config does not include valid path string');
-            // when pmemkv_errmsg() is implemented
-            expect(e.message).to.equal('pmemkv_open() failed');
+            expect(e.status).to.equal(constants.status.INVALID_ARGUMENT);
         }
         expect(db).not.to.exist;
     });
