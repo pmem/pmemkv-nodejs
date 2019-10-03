@@ -61,6 +61,13 @@ echo
 echo "########################################################"
 echo "### Checking an example"
 echo "########################################################"
-cd $WORKDIR
-cd examples
+cd $WORKDIR/examples
 PMEM_IS_PMEM_FORCE=1 node basic_example.js
+
+echo
+echo "########################################################"
+echo "### Generating doc"
+echo "########################################################"
+mkdir $WORKDIR/doc
+cd $WORKDIR/doc
+jsdoc ../lib/database.js --pedantic --verbose -R ../README.md
