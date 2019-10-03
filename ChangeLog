@@ -1,3 +1,15 @@
+Thu Oct 03 2019 Szymon Romik <szymon.romik@intel.com>
+
+	* Version 1.0
+
+	This is the first release of pmemkv-nodejs project which guarantees
+        backward compatibility.
+
+        It provides Node.js bindings to libpmemkv 1.0. The API is functionnally
+        equal to the native pmemkv C/C++ API. It also provides simple usage
+        example, API description, NodeJS-native support for configuring engines
+        by JSON object and CI machinery.
+
 Fri Jun 28 2019 Szymon Romik <szymon.romik@intel.com>
 
 	* Version 0.8
