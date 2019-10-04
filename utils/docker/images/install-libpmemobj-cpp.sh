@@ -41,7 +41,7 @@ git clone https://github.com/pmem/libpmemobj-cpp
 cd libpmemobj-cpp
 
 # Merge pull request #446 from igchor/fix_array_move_ctor, 30.09.2019
-git checkout 732064028f5337b8465cbf218f9c4feb9b2020ac
+git checkout 1.8
 
 mkdir build
 cd build
