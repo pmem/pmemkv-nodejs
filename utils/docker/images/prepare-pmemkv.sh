@@ -38,10 +38,7 @@ set -e
 
 package_type=$1
 
-# stable_pmemkv_version="0.8"
-
-# Merge pull request #456 from karczex/multithreaded_cmap_test, 27.09.2019
-current_pmemkv_version="70b4a1272dc0e0be1ed716ff8797092396295759"
+stable_pmemkv_version="1.0"
 
 prepare_pmemkv () {
 	pmemkv_version="$1"
@@ -62,8 +59,7 @@ prepare_pmemkv () {
 git clone https://github.com/pmem/pmemkv
 cd pmemkv
 
-# prepare_pmemkv "$stable_pmemkv_version" "pmemkv-stable"
-prepare_pmemkv "$current_pmemkv_version" "pmemkv-master"
+prepare_pmemkv "$stable_pmemkv_version" "pmemkv-stable"
 
 cd ..
 rm -r pmemkv
