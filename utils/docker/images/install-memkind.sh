@@ -46,9 +46,9 @@ git clone https://github.com/memkind/memkind memkind_git
 cd $WORKDIR/memkind_git
 git checkout $MEMKIND_STABLE_VERSION
 
-./build.sh prefix=/usr/
+./build.sh --prefix=/usr
 make -j$(nproc)
-make install
+make -j$(nproc) install
 
 cd $WORKDIR
 rm -r memkind_git
