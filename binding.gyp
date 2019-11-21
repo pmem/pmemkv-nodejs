@@ -14,7 +14,7 @@
         "-lpmemkv"
        ],
        'cflags_cc!': [ '-fno-rtti'],
-       'cflags_cc': ['-fexceptions']
+       'cflags_cc': ['-fexceptions  -std=c++17']
     }
   ]
 }

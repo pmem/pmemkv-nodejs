@@ -47,6 +47,7 @@ class db : public Napi::ObjectWrap<db> {
 
     Napi::Value stop(const Napi::CallbackInfo& info);
     Napi::Value get_keys(const Napi::CallbackInfo& info);
+    Napi::Value get_keys_as_buffer(const Napi::CallbackInfo& info);
     Napi::Value get_keys_above(const Napi::CallbackInfo& info);
     Napi::Value get_keys_below(const Napi::CallbackInfo& info);
     Napi::Value get_keys_between(const Napi::CallbackInfo& info);
@@ -55,6 +56,7 @@ class db : public Napi::ObjectWrap<db> {
     Napi::Value count_below(const Napi::CallbackInfo& info);
     Napi::Value count_between(const Napi::CallbackInfo& info);
     Napi::Value get_all(const Napi::CallbackInfo& info);
+    Napi::Value get_all_as_buffer(const Napi::CallbackInfo& info);
     Napi::Value get_above(const Napi::CallbackInfo& info);
     Napi::Value get_below(const Napi::CallbackInfo& info);
     Napi::Value get_between(const Napi::CallbackInfo& info);
