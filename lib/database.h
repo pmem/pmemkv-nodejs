@@ -37,6 +37,8 @@
 #include <libpmemkv.hpp>
 #include <napi.h>
 
+enum KeyType {KEY_TYPE_STRING, KEY_TYPE_BUFFER};
+
 class db : public Napi::ObjectWrap<db> {
   public:
     static Napi::Object init(Napi::Env env, Napi::Object exports);
@@ -55,15 +57,21 @@ class db : public Napi::ObjectWrap<db> {
     Napi::Value count_below(const Napi::CallbackInfo& info);
     Napi::Value count_between(const Napi::CallbackInfo& info);
     Napi::Value get_all(const Napi::CallbackInfo& info);
+    Napi::Value get_all_as_buffer(const Napi::CallbackInfo& info);
     Napi::Value get_above(const Napi::CallbackInfo& info);
+    Napi::Value get_above_as_buffer(const Napi::CallbackInfo& info);
     Napi::Value get_below(const Napi::CallbackInfo& info);
+    Napi::Value get_below_as_buffer(const Napi::CallbackInfo& info);
     Napi::Value get_between(const Napi::CallbackInfo& info);
+    Napi::Value get_between_as_buffer(const Napi::CallbackInfo& info);
     Napi::Value exists(const Napi::CallbackInfo& info);
     Napi::Value get(const Napi::CallbackInfo& info);
+    Napi::Value get_as_buffer(const Napi::CallbackInfo& info);
     Napi::Value put(const Napi::CallbackInfo& info);
     Napi::Value remove(const Napi::CallbackInfo& info);
 
     pmem::kv::db _db;
+    KeyType _key_type;
 };
 
 #endif
