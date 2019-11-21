@@ -91,6 +91,15 @@ describe('db', () => {
         db.stop();
     });
 
+    it('gets value as buffer', () => {
+        const db = new pmemkv.db(ENGINE, CONFIG);
+        db.put('key1', 'value1');
+        db.get_as_buffer('key1', (v) => {
+            expect(v.slice(2,4).toString()).to.equal('lu');
+        });
+        db.stop();
+    });
+
     it('puts basic value', () => {
         const db = new pmemkv.db(ENGINE, CONFIG);
         expect(db.exists('key1')).to.be.false;
@@ -112,6 +121,21 @@ describe('db', () => {
         const db = new pmemkv.db(ENGINE, CONFIG);
         db.put('key1', "A\0B\0\0C");
         expect(db.get('key1')).to.equal("A\0B\0\0C");
+        db.stop();
+    });
+
+    it('puts buffer key', () => {
+        const db = new pmemkv.db(ENGINE, CONFIG, 'Buffer');
+        db.put(Buffer.from('key1'), 'value1');
+        expect(db.exists(Buffer.from('key1'))).to.be.true;
+        expect(db.get(Buffer.from('key1')).toString()).to.equal('value1');
+        db.stop();
+    });
+
+    it('puts buffer value', () => {
+        const db = new pmemkv.db(ENGINE, CONFIG);
+        db.put('key1', Buffer.from('value1'));
+        expect(db.get('key1')).to.equal('value1');
         db.stop();
     });
 
@@ -199,6 +223,11 @@ describe('db', () => {
         expect(db.remove('key1')).to.be.false;
         expect(db.exists('key1')).to.be.false;
         expect(db.get('key1')).not.to.exist;
+        db.put('key2', 'value2');
+        expect(db.remove(Buffer.from('key2'))).to.be.true;
+        expect(db.remove(Buffer.from('key2'))).to.be.false;
+        expect(db.exists(Buffer.from('key2'))).to.be.false;
+        expect(db.get(Buffer.from('key2'))).not.to.exist;
         db.stop();
     });
 
@@ -266,7 +295,34 @@ describe('db', () => {
         db.put('记!', 'RR');
 
         let x = '';
-        db.get_all((k) => x += `<${k}>,`);
+        db.get_keys((k) => x += `<${k}>,`);
+        expect(x).to.equal('<1>,<2>,<记!>,');
+
+        db.stop();
+    });
+
+    it('uses get_keys_test for binary-key db', () => {
+        const db = new pmemkv.db(ENGINE, CONFIG, 'Buffer');
+        db.put('1', 'one');
+        db.put('2', 'two');
+        db.put('记!', 'RR');
+
+        x = '';
+        db.get_keys((k) => x += `<${k}>,`);
+        expect(x).to.equal('<1>,<2>,<记!>,');
+
+        db.stop();
+    });
+
+    it('unable to write returned key as Buffer', () => {
+        const db = new pmemkv.db(ENGINE, CONFIG, 'Buffer');
+        db.put('1', 'one');
+        db.put('2', 'two');
+        db.put('记!', 'RR');
+        db.get_keys((k) => {k[0] = 1});
+
+        x = '';
+        db.get_keys((k) => x += `<${k}>,`);
         expect(x).to.equal('<1>,<2>,<记!>,');
 
         db.stop();
@@ -287,7 +343,44 @@ describe('db', () => {
         expect(x).to.equal('BB,BC,记!,');
 
         x = '';
+        db.get_keys_above(Buffer.from('B'), (k) => x += `${k},`);
+        expect(x).to.equal('BB,BC,记!,');
+
+        x = '';
         db.get_keys_above('', (k) => x += `${k},`);
+        expect(x).to.equal('A,AB,AC,B,BB,BC,记!,');
+
+        x = '';
+        db.get_keys_above(Buffer.from(''), (k) => x += `${k},`);
+        expect(x).to.equal('A,AB,AC,B,BB,BC,记!,');
+
+        db.stop();
+    });
+
+    it('uses get_keys_above test for binary-key db', () => {
+        const db = new pmemkv.db(ENGINE, CONFIG, 'Buffer');
+        db.put('A', '1');
+        db.put('AB', '2');
+        db.put('AC', '3');
+        db.put('B', '4');
+        db.put('BB', '5');
+        db.put('BC', '6');
+        db.put('记!', 'RR');
+
+        let x = '';
+        db.get_keys_above('B', (k) => x += `${k},`);
+        expect(x).to.equal('BB,BC,记!,');
+
+        x = '';
+        db.get_keys_above(Buffer.from('B'), (k) => x += `${k},`);
+        expect(x).to.equal('BB,BC,记!,');
+
+        x = '';
+        db.get_keys_above('', (k) => x += `${k},`);
+        expect(x).to.equal('A,AB,AC,B,BB,BC,记!,');
+
+        x = '';
+        db.get_keys_above(Buffer.from(''), (k) => x += `${k},`);
         expect(x).to.equal('A,AB,AC,B,BB,BC,记!,');
 
         db.stop();
@@ -308,7 +401,44 @@ describe('db', () => {
         expect(x).to.equal('A,AB,AC,');
 
         x = '';
+        db.get_keys_below(Buffer.from('B'), (k) => x += `${k},`);
+        expect(x).to.equal('A,AB,AC,');
+
+        x = '';
         db.get_keys_below('\uFFFF', (k) => x += `${k},`);
+        expect(x).to.equal('A,AB,AC,B,BB,BC,记!,');
+
+        x = '';
+        db.get_keys_below(Buffer.from('\uFFFF'), (k) => x += `${k},`);
+        expect(x).to.equal('A,AB,AC,B,BB,BC,记!,');
+
+        db.stop();
+    });
+
+    it('uses get_keys_below test for binary-key db', () => {
+        const db = new pmemkv.db(ENGINE, CONFIG, 'Buffer');
+        db.put('A', '1');
+        db.put('AB', '2');
+        db.put('AC', '3');
+        db.put('B', '4');
+        db.put('BB', '5');
+        db.put('BC', '6');
+        db.put('记!', 'RR');
+
+        let x = '';
+        db.get_keys_below('B', (k) => x += `${k},`);
+        expect(x).to.equal('A,AB,AC,');
+
+        x = '';
+        db.get_keys_below(Buffer.from('B'), (k) => x += `${k},`);
+        expect(x).to.equal('A,AB,AC,');
+
+        x = '';
+        db.get_keys_below('\uFFFF', (k) => x += `${k},`);
+        expect(x).to.equal('A,AB,AC,B,BB,BC,记!,');
+
+        x = '';
+        db.get_keys_below(Buffer.from('\uFFFF'), (k) => x += `${k},`);
         expect(x).to.equal('A,AB,AC,B,BB,BC,记!,');
 
         db.stop();
@@ -329,13 +459,68 @@ describe('db', () => {
         expect(x).to.equal('AB,AC,');
 
         x = '';
+        db.get_keys_between(Buffer.from('A'), Buffer.from('B'), (k) => x += `${k},`);
+        expect(x).to.equal('AB,AC,');
+
+        x = '';
         db.get_keys_between('B', '\uFFFF', (k) => x += `${k},`);
+        expect(x).to.equal('BB,BC,记!,');
+
+        x = '';
+        db.get_keys_between(Buffer.from('B'), Buffer.from('\uFFFF'), (k) => x += `${k},`);
         expect(x).to.equal('BB,BC,记!,');
 
         x = '';
         db.get_keys_between('', '', (k) => x += `${k},`);
         db.get_keys_between('A', 'A', (k) => x += `${k},`);
         db.get_keys_between('B', 'A', (k) => x += `${k},`);
+        expect(x).to.equal('');
+
+        x = '';
+        db.get_keys_between(Buffer.from(''), Buffer.from(''), (k) => x += `${k},`);
+        db.get_keys_between(Buffer.from('A'), Buffer.from('A'), (k) => x += `${k},`);
+        db.get_keys_between(Buffer.from('B'), Buffer.from('A'), (k) => x += `${k},`);
+        expect(x).to.equal('');
+
+        db.stop();
+    });
+
+    it('uses get_keys_between test for binary-key db', () => {
+        const db = new pmemkv.db(ENGINE, CONFIG, 'Buffer');
+        db.put('A', '1');
+        db.put('AB', '2');
+        db.put('AC', '3');
+        db.put('B', '4');
+        db.put('BB', '5');
+        db.put('BC', '6');
+        db.put('记!', 'RR');
+
+        let x = '';
+        db.get_keys_between('A', 'B', (k) => x += `${k},`);
+        expect(x).to.equal('AB,AC,');
+
+        x = '';
+        db.get_keys_between(Buffer.from('A'), Buffer.from('B'), (k) => x += `${k},`);
+        expect(x).to.equal('AB,AC,');
+
+        x = '';
+        db.get_keys_between('B', '\uFFFF', (k) => x += `${k},`);
+        expect(x).to.equal('BB,BC,记!,');
+
+        x = '';
+        db.get_keys_between(Buffer.from('B'), Buffer.from('\uFFFF'), (k) => x += `${k},`);
+        expect(x).to.equal('BB,BC,记!,');
+
+        x = '';
+        db.get_keys_between('', '', (k) => x += `${k},`);
+        db.get_keys_between('A', 'A', (k) => x += `${k},`);
+        db.get_keys_between('B', 'A', (k) => x += `${k},`);
+        expect(x).to.equal('');
+
+        x = '';
+        db.get_keys_between(Buffer.from(''), Buffer.from(''), (k) => x += `${k},`);
+        db.get_keys_between(Buffer.from('A'), Buffer.from('A'), (k) => x += `${k},`);
+        db.get_keys_between(Buffer.from('B'), Buffer.from('A'), (k) => x += `${k},`);
         expect(x).to.equal('');
 
         db.stop();
@@ -359,17 +544,36 @@ describe('db', () => {
         expect(db.count_above('BD')).to.equal(0);
         expect(db.count_above('Z')).to.equal(0);
 
+        expect(db.count_above(Buffer.from(''))).to.equal(7);
+        expect(db.count_above(Buffer.from('A'))).to.equal(6);
+        expect(db.count_above(Buffer.from('B'))).to.equal(3);
+        expect(db.count_above(Buffer.from('BC'))).to.equal(1);
+        expect(db.count_above(Buffer.from('BD'))).to.equal(0);
+        expect(db.count_above(Buffer.from('Z'))).to.equal(0);
+
         expect(db.count_below('')).to.equal(0);
         expect(db.count_below('A')).to.equal(0);
         expect(db.count_below('B')).to.equal(3);
         expect(db.count_below('BD')).to.equal(6);
         expect(db.count_below('ZZZZZ')).to.equal(7);
 
+        expect(db.count_below(Buffer.from(''))).to.equal(0);
+        expect(db.count_below(Buffer.from('A'))).to.equal(0);
+        expect(db.count_below(Buffer.from('B'))).to.equal(3);
+        expect(db.count_below(Buffer.from('BD'))).to.equal(6);
+        expect(db.count_below(Buffer.from('ZZZZZ'))).to.equal(7);
+
         expect(db.count_between('', 'ZZZZ')).to.equal(7);
         expect(db.count_between('', 'A')).to.equal(0);
         expect(db.count_between('', 'B')).to.equal(3);
         expect(db.count_between('A', 'B')).to.equal(2);
         expect(db.count_between('B', 'ZZZZ')).to.equal(3);
+
+        expect(db.count_between(Buffer.from(''), Buffer.from('ZZZZ'))).to.equal(7);
+        expect(db.count_between(Buffer.from(''), Buffer.from('A'))).to.equal(0);
+        expect(db.count_between(Buffer.from(''), Buffer.from('B'))).to.equal(3);
+        expect(db.count_between(Buffer.from('A'), Buffer.from('B'))).to.equal(2);
+        expect(db.count_between(Buffer.from('B'), Buffer.from('ZZZZ'))).to.equal(3);
 
         expect(db.count_between('', '')).to.equal(0);
         expect(db.count_between('A', 'A')).to.equal(0);
@@ -391,6 +595,27 @@ describe('db', () => {
         db.get_all((k, v) => x += `<${k}>,<${v}>|`);
         expect(x).to.equal('<1>,<one>|<2>,<two>|<记!>,<RR>|');
 
+        x = '';
+        db.get_all_as_buffer((k, v) => x += `<${k}>,<${v}>|`);
+        expect(x).to.equal('<1>,<one>|<2>,<two>|<记!>,<RR>|');
+
+        db.stop();
+    });
+
+    it('uses get_all test for binary-key db', () => {
+        const db = new pmemkv.db(ENGINE, CONFIG, 'Buffer');
+        db.put(Buffer.from('1'), 'one');
+        db.put(Buffer.from('2'), 'two');
+        db.put(Buffer.from('记!'), 'RR');
+
+        let x = '';
+        db.get_all((k, v) => x += `<${k}>,<${v}>|`);
+        expect(x).to.equal('<1>,<one>|<2>,<two>|<记!>,<RR>|');
+
+        x = '';
+        db.get_all_as_buffer((k, v) => x += `<${k}>,<${v}>|`);
+        expect(x).to.equal('<1>,<one>|<2>,<two>|<记!>,<RR>|');
+
         db.stop();
     });
 
@@ -409,7 +634,44 @@ describe('db', () => {
         expect(x).to.equal('BB,5|BC,6|记!,RR|');
 
         x = '';
+        db.get_above_as_buffer('B', (k, v) => x += `${k},${v}|`);
+        expect(x).to.equal('BB,5|BC,6|记!,RR|');
+
+        x = '';
         db.get_above('', (k, v) => x += `${k},${v}|`);
+        expect(x).to.equal('A,1|AB,2|AC,3|B,4|BB,5|BC,6|记!,RR|');
+
+        x = '';
+        db.get_above_as_buffer('', (k, v) => x += `${k},${v}|`);
+        expect(x).to.equal('A,1|AB,2|AC,3|B,4|BB,5|BC,6|记!,RR|');
+
+        db.stop();
+    });
+
+    it('uses get_above test for binary-key db', () => {
+        const db = new pmemkv.db(ENGINE, CONFIG, 'Buffer');
+        db.put(Buffer.from('A'), '1');
+        db.put(Buffer.from('AB'), '2');
+        db.put(Buffer.from('AC'), '3');
+        db.put(Buffer.from('B'), '4');
+        db.put(Buffer.from('BB'), '5');
+        db.put(Buffer.from('BC'), '6');
+        db.put(Buffer.from('记!'), 'RR');
+
+        let x = '';
+        db.get_above(Buffer.from('B'), (k, v) => x += `${k},${v}|`);
+        expect(x).to.equal('BB,5|BC,6|记!,RR|');
+
+        x = '';
+        db.get_above_as_buffer(Buffer.from('B'), (k, v) => x += `${k},${v}|`);
+        expect(x).to.equal('BB,5|BC,6|记!,RR|');
+
+        x = '';
+        db.get_above(Buffer.from(''), (k, v) => x += `${k},${v}|`);
+        expect(x).to.equal('A,1|AB,2|AC,3|B,4|BB,5|BC,6|记!,RR|');
+
+        x = '';
+        db.get_above_as_buffer(Buffer.from(''), (k, v) => x += `${k},${v}|`);
         expect(x).to.equal('A,1|AB,2|AC,3|B,4|BB,5|BC,6|记!,RR|');
 
         db.stop();
@@ -430,7 +692,44 @@ describe('db', () => {
         expect(x).to.equal('A,1|AB,2|');
 
         x = '';
+        db.get_below_as_buffer('AC', (k, v) => x += `${k},${v}|`);
+        expect(x).to.equal('A,1|AB,2|');
+
+        x = '';
         db.get_below('\uFFFF', (k, v) => x += `${k},${v}|`);
+        expect(x).to.equal('A,1|AB,2|AC,3|B,4|BB,5|BC,6|记!,RR|');
+
+        x = '';
+        db.get_below_as_buffer('\uFFFF', (k, v) => x += `${k},${v}|`);
+        expect(x).to.equal('A,1|AB,2|AC,3|B,4|BB,5|BC,6|记!,RR|');
+
+        db.stop();
+    });
+
+    it('uses get_below test for binary-key db', () => {
+        const db = new pmemkv.db(ENGINE, CONFIG, 'Buffer');
+        db.put(Buffer.from('A'), '1');
+        db.put(Buffer.from('AB'), '2');
+        db.put(Buffer.from('AC'), '3');
+        db.put(Buffer.from('B'), '4');
+        db.put(Buffer.from('BB'), '5');
+        db.put(Buffer.from('BC'), '6');
+        db.put(Buffer.from('记!'), 'RR');
+
+        let x = '';
+        db.get_below(Buffer.from('AC'), (k, v) => x += `${k},${v}|`);
+        expect(x).to.equal('A,1|AB,2|');
+
+        x = '';
+        db.get_below_as_buffer(Buffer.from('AC'), (k, v) => x += `${k},${v}|`);
+        expect(x).to.equal('A,1|AB,2|');
+
+        x = '';
+        db.get_below(Buffer.from('\uFFFF'), (k, v) => x += `${k},${v}|`);
+        expect(x).to.equal('A,1|AB,2|AC,3|B,4|BB,5|BC,6|记!,RR|');
+
+        x = '';
+        db.get_below_as_buffer(Buffer.from('\uFFFF'), (k, v) => x += `${k},${v}|`);
         expect(x).to.equal('A,1|AB,2|AC,3|B,4|BB,5|BC,6|记!,RR|');
 
         db.stop();
@@ -451,13 +750,68 @@ describe('db', () => {
         expect(x).to.equal('AB,2|AC,3|');
 
         x = '';
+        db.get_between_as_buffer('A', 'B', (k, v) => x += `${k},${v}|`);
+        expect(x).to.equal('AB,2|AC,3|');
+
+        x = '';
         db.get_between('B', '\uFFFF', (k, v) => x += `${k},${v}|`);
+        expect(x).to.equal('BB,5|BC,6|记!,RR|');
+
+        x = '';
+        db.get_between_as_buffer('B', Buffer.from('\uFFFF'), (k, v) => x += `${k},${v}|`);
         expect(x).to.equal('BB,5|BC,6|记!,RR|');
 
         x = '';
         db.get_between('', '', (k, v) => x += `${k},${v}|`);
         db.get_between('A', 'A', (k, v) => x += `${k},${v}|`);
         db.get_between('B', 'A', (k, v) => x += `${k},${v}|`);
+        expect(x).to.equal('');
+
+        x = '';
+        db.get_between_as_buffer('', '', (k, v) => x += `${k},${v}|`);
+        db.get_between_as_buffer('A', 'A', (k, v) => x += `${k},${v}|`);
+        db.get_between_as_buffer('B', 'A', (k, v) => x += `${k},${v}|`);
+        expect(x).to.equal('');
+
+        db.stop();
+    });
+
+    it('uses get_between test for binary-key db', () => {
+        const db = new pmemkv.db(ENGINE, CONFIG, 'Buffer');
+        db.put(Buffer.from('A'), '1');
+        db.put(Buffer.from('AB'), '2');
+        db.put(Buffer.from('AC'), '3');
+        db.put(Buffer.from('B'), '4');
+        db.put(Buffer.from('BB'), '5');
+        db.put(Buffer.from('BC'), '6');
+        db.put(Buffer.from('记!'), 'RR');
+
+        let x = '';
+        db.get_between(Buffer.from('A'), Buffer.from('B'), (k, v) => x += `${k},${v}|`);
+        expect(x).to.equal('AB,2|AC,3|');
+
+        x = '';
+        db.get_between_as_buffer(Buffer.from('A'), Buffer.from('B'), (k, v) => x += `${k},${v}|`);
+        expect(x).to.equal('AB,2|AC,3|');
+
+        x = '';
+        db.get_between(Buffer.from('B'), Buffer.from('\uFFFF'), (k, v) => x += `${k},${v}|`);
+        expect(x).to.equal('BB,5|BC,6|记!,RR|');
+
+        x = '';
+        db.get_between_as_buffer(Buffer.from('B'), Buffer.from('\uFFFF'), (k, v) => x += `${k},${v}|`);
+        expect(x).to.equal('BB,5|BC,6|记!,RR|');
+
+        x = '';
+        db.get_between(Buffer.from(''), Buffer.from(''), (k, v) => x += `${k},${v}|`);
+        db.get_between(Buffer.from('A'), Buffer.from('A'), (k, v) => x += `${k},${v}|`);
+        db.get_between(Buffer.from('B'), Buffer.from('A'), (k, v) => x += `${k},${v}|`);
+        expect(x).to.equal('');
+
+        x = '';
+        db.get_between_as_buffer(Buffer.from(''), Buffer.from(''), (k, v) => x += `${k},${v}|`);
+        db.get_between_as_buffer(Buffer.from('A'), Buffer.from('A'), (k, v) => x += `${k},${v}|`);
+        db.get_between_as_buffer(Buffer.from('B'), Buffer.from('A'), (k, v) => x += `${k},${v}|`);
         expect(x).to.equal('');
 
         db.stop();
