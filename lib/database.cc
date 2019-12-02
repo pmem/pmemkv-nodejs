@@ -38,11 +38,11 @@
     std::string str_##output;\
     if (input.IsString()){\
         str_##output = input.As<Napi::String>().Utf8Value();\
-        output = std::string_view(str_##output);\
+        output = pmem::kv::string_view(str_##output);\
     }\
     else if (input.IsBuffer()){\
         Napi::Buffer<char> buffer = input.As<Napi::Buffer<char>>();\
-        output = std::string_view(buffer.Data(), buffer.Length());\
+        output = pmem::kv::string_view(buffer.Data(), buffer.Length());\
     }\
     else{\
         Napi::Error::New(env, "A string or Buffer is expected").ThrowAsJavaScriptException();\
@@ -173,7 +173,7 @@ Napi::Value db::get_keys_as_buffer(const Napi::CallbackInfo& info) {
     Napi::Env env = info.Env();
     Napi::Function cb = info[0].As<Napi::Function>();
     pmem::kv::status status = this->_db.get_all([&](pmem::kv::string_view key, pmem::kv::string_view value) -> int {
-        cb.Call(env.Global(), {Napi::Buffer<char>::Copy(env, key.data(), key.length())});
+        cb.Call(env.Global(), {Napi::Buffer<char>::Copy(env, key.data(), key.size())});
         return 0;
     });
     if (status != pmem::kv::status::OK){
@@ -186,14 +186,14 @@ Napi::Value db::get_keys_as_buffer(const Napi::CallbackInfo& info) {
 
 Napi::Value db::get_keys_above(const Napi::CallbackInfo& info) {
     Napi::Env env = info.Env();
-    std::string_view key;
+    pmem::kv::string_view key;
     GET_STRING_VIEW(info[0], key);
     Napi::Function cb = info[1].As<Napi::Function>();
     pmem::kv::status status = this->_db.get_above(key, [&](pmem::kv::string_view key, pmem::kv::string_view value) -> int {
         if (info[0].IsString())
-            cb.Call(env.Global(), {Napi::String::New(env, key.data(), key.length())});
+            cb.Call(env.Global(), {Napi::String::New(env, key.data(), key.size())});
         else
-            cb.Call(env.Global(), {Napi::Buffer<char>::Copy(env, key.data(), key.length())});
+            cb.Call(env.Global(), {Napi::Buffer<char>::Copy(env, key.data(), key.size())});
         return 0;
     });
     if (status != pmem::kv::status::OK){
@@ -206,14 +206,14 @@ Napi::Value db::get_keys_above(const Napi::CallbackInfo& info) {
 
 Napi::Value db::get_keys_below(const Napi::CallbackInfo& info) {
     Napi::Env env = info.Env();
-    std::string_view key;
+    pmem::kv::string_view key;
     GET_STRING_VIEW(info[0], key);
     Napi::Function cb = info[1].As<Napi::Function>();
     pmem::kv::status status = this->_db.get_below(key, [&](pmem::kv::string_view key, pmem::kv::string_view value) -> int {
         if (info[0].IsString())
-            cb.Call(env.Global(), {Napi::String::New(env, key.data(), key.length())});
+            cb.Call(env.Global(), {Napi::String::New(env, key.data(), key.size())});
         else
-            cb.Call(env.Global(), {Napi::Buffer<char>::Copy(env, key.data(), key.length())});
+            cb.Call(env.Global(), {Napi::Buffer<char>::Copy(env, key.data(), key.size())});
         return 0;
     });
     if (status != pmem::kv::status::OK){
@@ -226,16 +226,16 @@ Napi::Value db::get_keys_below(const Napi::CallbackInfo& info) {
 
 Napi::Value db::get_keys_between(const Napi::CallbackInfo& info) {
     Napi::Env env = info.Env();
-    std::string_view key1;
+    pmem::kv::string_view key1;
     GET_STRING_VIEW(info[0], key1);
-    std::string_view key2;
+    pmem::kv::string_view key2;
     GET_STRING_VIEW(info[1], key2)
     Napi::Function cb = info[2].As<Napi::Function>();
     pmem::kv::status status = this->_db.get_between(key1, key2, [&](pmem::kv::string_view key, pmem::kv::string_view value) -> int {
         if (info[0].IsString())
-            cb.Call(env.Global(), {Napi::String::New(env, key.data(), key.length())});
+            cb.Call(env.Global(), {Napi::String::New(env, key.data(), key.size())});
         else
-            cb.Call(env.Global(), {Napi::Buffer<char>::Copy(env, key.data(), key.length())});
+            cb.Call(env.Global(), {Napi::Buffer<char>::Copy(env, key.data(), key.size())});
         return 0;
     });
     if (status != pmem::kv::status::OK){
@@ -261,7 +261,7 @@ Napi::Value db::count_all(const Napi::CallbackInfo& info) {
 
 Napi::Value db::count_above(const Napi::CallbackInfo& info) {
     Napi::Env env = info.Env();
-    std::string_view key;
+    pmem::kv::string_view key;
     GET_STRING_VIEW(info[0], key);
     std::size_t cnt;
     pmem::kv::status status = this->_db.count_above(key, cnt);
@@ -276,7 +276,7 @@ Napi::Value db::count_above(const Napi::CallbackInfo& info) {
 
 Napi::Value db::count_below(const Napi::CallbackInfo& info) {
     Napi::Env env = info.Env();
-    std::string_view key;
+    pmem::kv::string_view key;
     GET_STRING_VIEW(info[0], key);
     std::size_t cnt;
     pmem::kv::status status = this->_db.count_below(key, cnt);
@@ -291,9 +291,9 @@ Napi::Value db::count_below(const Napi::CallbackInfo& info) {
 
 Napi::Value db::count_between(const Napi::CallbackInfo& info) {
     Napi::Env env = info.Env();
-    std::string_view key1;
+    pmem::kv::string_view key1;
     GET_STRING_VIEW(info[0], key1);
-    std::string_view key2;
+    pmem::kv::string_view key2;
     GET_STRING_VIEW(info[1], key2)
     std::size_t cnt;
     pmem::kv::status status = this->_db.count_between(key1, key2, cnt);
@@ -325,7 +325,7 @@ Napi::Value db::get_all_as_buffer(const Napi::CallbackInfo& info) {
     Napi::Env env = info.Env();
     Napi::Function cb = info[0].As<Napi::Function>();
     pmem::kv::status status = this->_db.get_all([&](pmem::kv::string_view key, pmem::kv::string_view value) -> int {
-        cb.Call(env.Global(), {Napi::Buffer<char>::Copy(env, key.data(), key.length()), Napi::Buffer<char>::Copy(env, value.data(), value.length())});
+        cb.Call(env.Global(), {Napi::Buffer<char>::Copy(env, key.data(), key.size()), Napi::Buffer<char>::Copy(env, value.data(), value.size())});
         return 0;
     });
     if (status != pmem::kv::status::OK){
@@ -338,14 +338,14 @@ Napi::Value db::get_all_as_buffer(const Napi::CallbackInfo& info) {
 
 Napi::Value db::get_above(const Napi::CallbackInfo& info) {
     Napi::Env env = info.Env();
-    std::string_view key;
+    pmem::kv::string_view key;
     GET_STRING_VIEW(info[0], key);
     Napi::Function cb = info[1].As<Napi::Function>();
     pmem::kv::status status = this->_db.get_above(key, [&](pmem::kv::string_view key, pmem::kv::string_view value) -> int {
         if (info[0].IsString())
-            cb.Call(env.Global(), {Napi::String::New(env, key.data(), key.length()), Napi::String::New(env, value.data(), value.length())});
+            cb.Call(env.Global(), {Napi::String::New(env, key.data(), key.size()), Napi::String::New(env, value.data(), value.size())});
         else
-            cb.Call(env.Global(), {Napi::Buffer<char>::Copy(env, key.data(), key.length()), Napi::Buffer<char>::Copy(env, value.data(), value.length())});
+            cb.Call(env.Global(), {Napi::Buffer<char>::Copy(env, key.data(), key.size()), Napi::Buffer<char>::Copy(env, value.data(), value.size())});
         return 0;
     });
     if (status != pmem::kv::status::OK){
@@ -358,14 +358,14 @@ Napi::Value db::get_above(const Napi::CallbackInfo& info) {
 
 Napi::Value db::get_below(const Napi::CallbackInfo& info) {
     Napi::Env env = info.Env();
-    std::string_view key;
+    pmem::kv::string_view key;
     GET_STRING_VIEW(info[0], key);
     Napi::Function cb = info[1].As<Napi::Function>();
     pmem::kv::status status = this->_db.get_below(key, [&](pmem::kv::string_view key, pmem::kv::string_view value) -> int {
         if (info[0].IsString())
-            cb.Call(env.Global(), {Napi::String::New(env, key.data(), key.length()), Napi::String::New(env, value.data(), value.length())});
+            cb.Call(env.Global(), {Napi::String::New(env, key.data(), key.size()), Napi::String::New(env, value.data(), value.size())});
         else
-            cb.Call(env.Global(), {Napi::Buffer<char>::Copy(env, key.data(), key.length()), Napi::Buffer<char>::Copy(env, value.data(), value.length())});
+            cb.Call(env.Global(), {Napi::Buffer<char>::Copy(env, key.data(), key.size()), Napi::Buffer<char>::Copy(env, value.data(), value.size())});
         return 0;
     });
     if (status != pmem::kv::status::OK){
@@ -378,16 +378,16 @@ Napi::Value db::get_below(const Napi::CallbackInfo& info) {
 
 Napi::Value db::get_between(const Napi::CallbackInfo& info) {
     Napi::Env env = info.Env();
-    std::string_view key1;
+    pmem::kv::string_view key1;
     GET_STRING_VIEW(info[0], key1);
-    std::string_view key2;
+    pmem::kv::string_view key2;
     GET_STRING_VIEW(info[1], key2)
     Napi::Function cb = info[2].As<Napi::Function>();
     pmem::kv::status status = this->_db.get_between(key1, key2, [&](pmem::kv::string_view key, pmem::kv::string_view value) -> int {
         if (info[0].IsString())
-            cb.Call(env.Global(), {Napi::String::New(env, key.data(), key.length()), Napi::String::New(env, value.data(), value.length())});
+            cb.Call(env.Global(), {Napi::String::New(env, key.data(), key.size()), Napi::String::New(env, value.data(), value.size())});
         else
-            cb.Call(env.Global(), {Napi::Buffer<char>::Copy(env, key.data(), key.length()), Napi::Buffer<char>::Copy(env, value.data(), value.length())});
+            cb.Call(env.Global(), {Napi::Buffer<char>::Copy(env, key.data(), key.size()), Napi::Buffer<char>::Copy(env, value.data(), value.size())});
         return 0;
     });
     if (status != pmem::kv::status::OK){
@@ -400,7 +400,7 @@ Napi::Value db::get_between(const Napi::CallbackInfo& info) {
 
 Napi::Value db::exists(const Napi::CallbackInfo& info) {
     Napi::Env env = info.Env();
-    std::string_view key;
+    pmem::kv::string_view key;
     GET_STRING_VIEW(info[0], key);
     pmem::kv::status status = _db.exists(key);
     if (status != pmem::kv::status::OK && status != pmem::kv::status::NOT_FOUND){
@@ -413,7 +413,7 @@ Napi::Value db::exists(const Napi::CallbackInfo& info) {
 
 Napi::Value db::get(const Napi::CallbackInfo& info) {
     Napi::Env env = info.Env();
-    std::string_view key;
+    pmem::kv::string_view key;
     GET_STRING_VIEW(info[0], key);
     std::string value;
     pmem::kv::status status = this->_db.get(key, &value);
@@ -421,7 +421,7 @@ Napi::Value db::get(const Napi::CallbackInfo& info) {
         if (info[0].IsString())
             return Napi::String::New(env, value);
         else
-            return Napi::Buffer<char>::Copy(env, value.c_str(), value.length());
+            return Napi::Buffer<char>::Copy(env, value.c_str(), value.size());
     }
     else if (status == pmem::kv::status::NOT_FOUND) {
         return env.Undefined();
@@ -435,9 +435,9 @@ Napi::Value db::get(const Napi::CallbackInfo& info) {
 
 Napi::Value db::put(const Napi::CallbackInfo& info) {
     Napi::Env env = info.Env();
-    std::string_view key;
+    pmem::kv::string_view key;
     GET_STRING_VIEW(info[0], key);
-    std::string_view value;
+    pmem::kv::string_view value;
     GET_STRING_VIEW(info[1], value);
     pmem::kv::status status = this->_db.put(key, value);
     if (status != pmem::kv::status::OK) {
@@ -450,7 +450,7 @@ Napi::Value db::put(const Napi::CallbackInfo& info) {
 
 Napi::Value db::remove(const Napi::CallbackInfo& info) {
     Napi::Env env = info.Env();
-    std::string_view key;
+    pmem::kv::string_view key;
     GET_STRING_VIEW(info[0], key);
     pmem::kv::status status = this->_db.remove(key);
     if (status != pmem::kv::status::OK && status != pmem::kv::status::NOT_FOUND){
