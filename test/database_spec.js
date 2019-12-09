@@ -314,6 +314,26 @@ describe('db', () => {
         db.stop();
     });
 
+    it('uses get_keys_below throw_exception_in_callback test', () => {
+	function ex(key) {
+		throw new Error('TestException');
+	}
+        const db = new pmemkv.db(ENGINE, CONFIG);
+        db.put('A', '1');
+        db.put('AB', '2');
+        db.put('AC', '3');
+        db.put('B', '4');
+        db.put('BB', '5');
+        db.put('BC', '6');
+
+        try {
+             db.get_keys_below('B', ex);
+        } catch (e) {
+            expect(e.message).to.equal('TestException');
+        }
+        db.stop();
+    });
+
     it('uses get_keys_between test', () => {
         const db = new pmemkv.db(ENGINE, CONFIG);
         db.put('A', '1');
