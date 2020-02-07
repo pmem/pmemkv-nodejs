@@ -27,3 +27,14 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+Everything in this source tree is covered by the previous license
+with the following exceptions:
+
+* Files in these directories:
+  * master/jsdoc/fonts
+  * master/jsdoc/scripts
+  * master/jsdoc/styles
+  are licensed under the Apache License 2.0
+  (see: https://github.com/jsdoc/jsdoc/blob/master/LICENSE).

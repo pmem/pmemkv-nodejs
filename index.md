@@ -10,3 +10,6 @@ The **Node.js binding** is released in version 1.0 and is compatible with libpme
 
 Current code, tests, examples and installation guide can be accessed on
 [github page](https://github.com/pmem/pmemkv-nodejs).
+
+The API of pmemkv-nodejs binding is documented in the following docs:
+* [master](./master/jsdoc/index.html)
