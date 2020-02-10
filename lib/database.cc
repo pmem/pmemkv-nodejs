@@ -48,8 +48,13 @@
         return Napi::Value();\
     }
 
-#define NAPI_CREATE_STRING(env, view) Napi::String::New(env, view.data(), view.size())
-#define NAPI_CREATE_BUFFER(env, view) Napi::Buffer<char>::New(env, const_cast<char*>(view.data()), view.size())
+Napi::String create_napi_string(Napi::Env env, pmem::kv::string_view view){ 
+    return Napi::String::New(env, view.data(), view.size());
+}
+
+Napi::Buffer<char> create_napi_buffer(Napi::Env env, pmem::kv::string_view view){
+    return Napi::Buffer<char>::New(env, const_cast<char*>(view.data()), view.size());
+}
 
 Napi::FunctionReference db::constructor;
 
@@ -114,6 +119,7 @@ db::db(const Napi::CallbackInfo& info) : Napi::ObjectWrap<db>(info), _db() {
     Napi::Object config = info[1].As<Napi::Object>();
     Napi::Array props = config.GetPropertyNames();
     std::string key_type = info[2].As<Napi::String>().Utf8Value();
+    // TODO: check key_type's consistency when reopening a database
     if (key_type.compare("String") == 0){
         this->_key_type = KEY_TYPE_STRING;
     }
@@ -176,13 +182,13 @@ Napi::Value db::get_keys(const Napi::CallbackInfo& info) {
     pmem::kv::status status;
     if (_key_type == KEY_TYPE_STRING){
         status = this->_db.get_all([&](pmem::kv::string_view key, pmem::kv::string_view value) -> int {
-            cb.Call(env.Global(), {NAPI_CREATE_STRING(env, key)});
+            cb.Call(env.Global(), {create_napi_string(env, key)});
             return 0;
         });
     }
     else {
         status = this->_db.get_all([&](pmem::kv::string_view key, pmem::kv::string_view value) -> int {
-            cb.Call(env.Global(), {NAPI_CREATE_BUFFER(env, key)});
+            cb.Call(env.Global(), {create_napi_buffer(env, key)});
             return 0;
         });
     }
@@ -202,13 +208,13 @@ Napi::Value db::get_keys_above(const Napi::CallbackInfo& info) {
     pmem::kv::status status;
     if (_key_type == KEY_TYPE_STRING){
         status = this->_db.get_above(key, [&](pmem::kv::string_view key, pmem::kv::string_view value) -> int {
-            cb.Call(env.Global(), {NAPI_CREATE_STRING(env, key)});
+            cb.Call(env.Global(), {create_napi_string(env, key)});
             return 0;
         });
     }
     else {
         status = this->_db.get_above(key, [&](pmem::kv::string_view key, pmem::kv::string_view value) -> int {
-            cb.Call(env.Global(), {NAPI_CREATE_BUFFER(env, key)});
+            cb.Call(env.Global(), {create_napi_buffer(env, key)});
             return 0;
         });
     }
@@ -228,13 +234,13 @@ Napi::Value db::get_keys_below(const Napi::CallbackInfo& info) {
     pmem::kv::status status;
     if (_key_type == KEY_TYPE_STRING){
         status = this->_db.get_below(key, [&](pmem::kv::string_view key, pmem::kv::string_view value) -> int {
-            cb.Call(env.Global(), {NAPI_CREATE_STRING(env, key)});
+            cb.Call(env.Global(), {create_napi_string(env, key)});
             return 0;
         });
     }
     else {
         status = this->_db.get_below(key, [&](pmem::kv::string_view key, pmem::kv::string_view value) -> int {
-            cb.Call(env.Global(), {NAPI_CREATE_BUFFER(env, key)});
+            cb.Call(env.Global(), {create_napi_buffer(env, key)});
             return 0;
         });
     }
@@ -256,13 +262,13 @@ Napi::Value db::get_keys_between(const Napi::CallbackInfo& info) {
     pmem::kv::status status;
     if (_key_type == KEY_TYPE_STRING){
         status = this->_db.get_between(key1, key2, [&](pmem::kv::string_view key, pmem::kv::string_view value) -> int {
-            cb.Call(env.Global(), {NAPI_CREATE_STRING(env, key)});
+            cb.Call(env.Global(), {create_napi_string(env, key)});
             return 0;
         });
     }
     else {
         status = this->_db.get_between(key1, key2, [&](pmem::kv::string_view key, pmem::kv::string_view value) -> int {
-            cb.Call(env.Global(), {NAPI_CREATE_BUFFER(env, key)});
+            cb.Call(env.Global(), {create_napi_buffer(env, key)});
             return 0;
         });
     }
@@ -340,13 +346,13 @@ Napi::Value db::get_all(const Napi::CallbackInfo& info) {
     pmem::kv::status status;
     if (_key_type == KEY_TYPE_STRING){
         status = this->_db.get_all([&](pmem::kv::string_view key, pmem::kv::string_view value) -> int {
-            cb.Call(env.Global(), {NAPI_CREATE_STRING(env, key), NAPI_CREATE_STRING(env, value)});
+            cb.Call(env.Global(), {create_napi_string(env, key), create_napi_string(env, value)});
             return 0;
         });
     }
     else {
         status = this->_db.get_all([&](pmem::kv::string_view key, pmem::kv::string_view value) -> int {
-            cb.Call(env.Global(), {NAPI_CREATE_BUFFER(env, key), NAPI_CREATE_STRING(env, value)});
+            cb.Call(env.Global(), {create_napi_buffer(env, key), create_napi_string(env, value)});
             return 0;
         });
     }
@@ -364,13 +370,13 @@ Napi::Value db::get_all_as_buffer(const Napi::CallbackInfo& info) {
     pmem::kv::status status;
     if (_key_type == KEY_TYPE_STRING){
         status = this->_db.get_all([&](pmem::kv::string_view key, pmem::kv::string_view value) -> int {
-            cb.Call(env.Global(), {NAPI_CREATE_STRING(env, key), NAPI_CREATE_BUFFER(env, value)});
+            cb.Call(env.Global(), {create_napi_string(env, key), create_napi_buffer(env, value)});
             return 0;
         });
     }
     else {
         status = this->_db.get_all([&](pmem::kv::string_view key, pmem::kv::string_view value) -> int {
-            cb.Call(env.Global(), {NAPI_CREATE_BUFFER(env, key), NAPI_CREATE_BUFFER(env, value)});
+            cb.Call(env.Global(), {create_napi_buffer(env, key), create_napi_buffer(env, value)});
             return 0;
         });
     }
@@ -391,13 +397,13 @@ Napi::Value db::get_above(const Napi::CallbackInfo& info) {
     pmem::kv::status status;
     if (_key_type == KEY_TYPE_STRING){
         status = this->_db.get_above(key, [&](pmem::kv::string_view key, pmem::kv::string_view value) -> int {
-            cb.Call(env.Global(), {NAPI_CREATE_STRING(env, key), NAPI_CREATE_STRING(env, value)});
+            cb.Call(env.Global(), {create_napi_string(env, key), create_napi_string(env, value)});
             return 0;
         });
     }
     else {
         status = this->_db.get_above(key, [&](pmem::kv::string_view key, pmem::kv::string_view value) -> int {
-            cb.Call(env.Global(), {NAPI_CREATE_BUFFER(env, key), NAPI_CREATE_STRING(env, value)});
+            cb.Call(env.Global(), {create_napi_buffer(env, key), create_napi_string(env, value)});
             return 0;
         });
     }
@@ -417,13 +423,13 @@ Napi::Value db::get_above_as_buffer(const Napi::CallbackInfo& info) {
     pmem::kv::status status;
     if (_key_type == KEY_TYPE_STRING){
         status = this->_db.get_above(key, [&](pmem::kv::string_view key, pmem::kv::string_view value) -> int {
-            cb.Call(env.Global(), {NAPI_CREATE_STRING(env, key), NAPI_CREATE_BUFFER(env, value)});
+            cb.Call(env.Global(), {create_napi_string(env, key), create_napi_buffer(env, value)});
             return 0;
         });
     }
     else {
         status = this->_db.get_above(key, [&](pmem::kv::string_view key, pmem::kv::string_view value) -> int {
-            cb.Call(env.Global(), {NAPI_CREATE_BUFFER(env, key), NAPI_CREATE_BUFFER(env, value)});
+            cb.Call(env.Global(), {create_napi_buffer(env, key), create_napi_buffer(env, value)});
             return 0;
         });
     }
@@ -443,13 +449,13 @@ Napi::Value db::get_below(const Napi::CallbackInfo& info) {
     pmem::kv::status status;
     if (_key_type == KEY_TYPE_STRING){
         status = this->_db.get_below(key, [&](pmem::kv::string_view key, pmem::kv::string_view value) -> int {
-            cb.Call(env.Global(), {NAPI_CREATE_STRING(env, key), NAPI_CREATE_STRING(env, value)});
+            cb.Call(env.Global(), {create_napi_string(env, key), create_napi_string(env, value)});
             return 0;
         });
     }
     else {
         status = this->_db.get_below(key, [&](pmem::kv::string_view key, pmem::kv::string_view value) -> int {
-            cb.Call(env.Global(), {NAPI_CREATE_BUFFER(env, key), NAPI_CREATE_STRING(env, value)});
+            cb.Call(env.Global(), {create_napi_buffer(env, key), create_napi_string(env, value)});
             return 0;
         });
     }
@@ -469,13 +475,13 @@ Napi::Value db::get_below_as_buffer(const Napi::CallbackInfo& info) {
     pmem::kv::status status;
     if (_key_type == KEY_TYPE_STRING){
         status = this->_db.get_below(key, [&](pmem::kv::string_view key, pmem::kv::string_view value) -> int {
-            cb.Call(env.Global(), {NAPI_CREATE_STRING(env, key), NAPI_CREATE_BUFFER(env, value)});
+            cb.Call(env.Global(), {create_napi_string(env, key), create_napi_buffer(env, value)});
             return 0;
         });
     }
     else {
         status = this->_db.get_below(key, [&](pmem::kv::string_view key, pmem::kv::string_view value) -> int {
-            cb.Call(env.Global(), {NAPI_CREATE_BUFFER(env, key), NAPI_CREATE_BUFFER(env, value)});
+            cb.Call(env.Global(), {create_napi_buffer(env, key), create_napi_buffer(env, value)});
             return 0;
         });
     }
@@ -497,13 +503,13 @@ Napi::Value db::get_between(const Napi::CallbackInfo& info) {
     pmem::kv::status status;
     if (_key_type == KEY_TYPE_STRING){
         status = this->_db.get_between(key1, key2, [&](pmem::kv::string_view key, pmem::kv::string_view value) -> int {
-            cb.Call(env.Global(), {NAPI_CREATE_STRING(env, key), NAPI_CREATE_STRING(env, value)});
+            cb.Call(env.Global(), {create_napi_string(env, key), create_napi_string(env, value)});
             return 0;
         });
     }
     else {
         status = this->_db.get_between(key1, key2, [&](pmem::kv::string_view key, pmem::kv::string_view value) -> int {
-            cb.Call(env.Global(), {NAPI_CREATE_BUFFER(env, key), NAPI_CREATE_STRING(env, value)});
+            cb.Call(env.Global(), {create_napi_buffer(env, key), create_napi_string(env, value)});
             return 0;
         });
     }
@@ -525,13 +531,13 @@ Napi::Value db::get_between_as_buffer(const Napi::CallbackInfo& info) {
     pmem::kv::status status;
     if (_key_type == KEY_TYPE_STRING){
         status = this->_db.get_between(key1, key2, [&](pmem::kv::string_view key, pmem::kv::string_view value) -> int {
-            cb.Call(env.Global(), {NAPI_CREATE_STRING(env, key), NAPI_CREATE_BUFFER(env, value)});
+            cb.Call(env.Global(), {create_napi_string(env, key), create_napi_buffer(env, value)});
             return 0;
         });
     }
     else {
         status = this->_db.get_between(key1, key2, [&](pmem::kv::string_view key, pmem::kv::string_view value) -> int {
-            cb.Call(env.Global(), {NAPI_CREATE_BUFFER(env, key), NAPI_CREATE_BUFFER(env, value)});
+            cb.Call(env.Global(), {create_napi_buffer(env, key), create_napi_buffer(env, value)});
             return 0;
         });
     }
@@ -562,7 +568,7 @@ Napi::Value db::get(const Napi::CallbackInfo& info) {
     GET_STRING_VIEW(info[0], key);
     Napi::Value result;
     pmem::kv::status status = this->_db.get(key, [&](pmem::kv::string_view value) -> int {
-        result = NAPI_CREATE_STRING(env, value);
+        result = create_napi_string(env, value);
         return 0;
     });
     if (status == pmem::kv::status::OK){
@@ -582,17 +588,12 @@ Napi::Value db::get_as_buffer(const Napi::CallbackInfo& info) {
     Napi::Env env = info.Env();
     pmem::kv::string_view key;
     GET_STRING_VIEW(info[0], key);
-    Napi::Value result;
+    Napi::Function cb = info[1].As<Napi::Function>();
     pmem::kv::status status = this->_db.get(key, [&](pmem::kv::string_view value) -> int {
-        result = NAPI_CREATE_BUFFER(env, value);
+        cb.Call(env.Global(), {create_napi_buffer(env, value)});
         return 0;
     });
-    if (status == pmem::kv::status::OK){
-        return result;
-    }
-    else if (status == pmem::kv::status::NOT_FOUND) {
-        return env.Undefined();
-    } else {
+    if (status != pmem::kv::status::OK && status != pmem::kv::status::NOT_FOUND){
         Napi::Error e = Napi::Error::New(env, pmem::kv::errormsg());
         e.Set("status", Napi::Number::New(env, int(status)));
         e.ThrowAsJavaScriptException();
