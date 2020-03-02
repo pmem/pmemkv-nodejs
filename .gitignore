@@ -1,0 +1,7 @@
+.*
+!.gitignore
+*.iml
+build/
+doc/
+node_modules/
+package-lock.json
