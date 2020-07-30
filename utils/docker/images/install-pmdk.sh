@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Copyright 2019, Intel Corporation
+# Copyright 2019-2022, Intel Corporation
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -39,10 +39,10 @@ set -e
 PREFIX=/usr
 PACKAGE_TYPE=$1
 
-# stable-1.7: Merge pull request #4097 from pmem/stable-1.6, 5.11.2019
-PMDK_VERSION="31cea307b2b7c0c0d0d209b8c5f47adc9d1353a0"
+# common: 1.12.0 release, 24.05.2022
+PMDK_VERSION=73d8f958e855904dc0776a7d77d0f0d3698a65b1
 
-git clone https://github.com/pmem/pmdk --shallow-since=2019-09-26
+git clone https://github.com/pmem/pmdk --shallow-since=2020-01-01
 cd pmdk
 git checkout $PMDK_VERSION
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Copyright 2019, Intel Corporation
+# Copyright 2019-2020, Intel Corporation
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -40,10 +40,10 @@ set -e
 PREFIX=/usr
 PACKAGE_TYPE=$1
 
-# master: Merge pull request #495 from MisterArslan/persistent_tls, 15.11.2019
-LIBPMEMOBJ_CPP_VERSION=8e390f36b98a2a09a7acce4541a29272387373d2
+# libpmemobj-cpp version 1.10, 28.05.2020
+LIBPMEMOBJ_CPP_VERSION="1.10"
 
-git clone https://github.com/pmem/libpmemobj-cpp --shallow-since=2019-10-02
+git clone https://github.com/pmem/libpmemobj-cpp --shallow-since=2020-01-01
 cd libpmemobj-cpp
 git checkout $LIBPMEMOBJ_CPP_VERSION
 
