@@ -27,6 +27,6 @@
   "dependencies": {
     "node-addon-api": "*",
     "bindings": "^1.2.1",
-    "node-gyp": "^3.6.2"
+    "node-gyp": "^9.0.0"
   }
 }
