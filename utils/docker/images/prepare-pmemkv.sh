@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Copyright 2019, Intel Corporation
+# Copyright 2019-2020, Intel Corporation
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -39,10 +39,10 @@ set -e
 PREFIX=/usr
 PACKAGE_TYPE=$1
 
-# master: Add [count|get]_[above|below] API support for stree engine (#523); 18.11.2019
-current_pmemkv_version="6fbad66aaffa0387308de5beced6aa5fe30fff3b"
-# stable-1.0: Merge pull request #528 from ldorau/Do-not-add-pmemkv_config...; 14.11.2019
-stable_1_pmemkv_version="a3735b5393f0d5411ef8a2468b36d2a1ed00c0a1"
+# master: Merge pull request #732 from lukaszstolarczuk/update-docker-cont...; 27.07.2020
+current_pmemkv_version="bfd036226540e89aa240a09896e58e1bfa176e1e"
+# stable-1.0: Merge pull request #522 from lukaszstolarczuk/always-find-li...; 10.07.2020
+stable_1_pmemkv_version="dc28a8a7cd9d81491d8648bc7fe1f90b83dbb3ce"
 
 prepare_pmemkv () {
 	pmemkv_version="$1"
